@@ -1,0 +1,24 @@
+{
+  "name": "clinicos-whatsapp-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Worker WhatsApp (Baileys) always-on para clinicOS. Servicio separado: Railway/Fly.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4",
+    "@whiskeysockets/baileys": "^6.7.9",
+    "pino": "^9.5.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.22.1",
+    "typescript": "^5",
+    "@types/qrcode": "^1.5.5"
+  }
+}
