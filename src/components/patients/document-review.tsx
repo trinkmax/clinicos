@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpToLine,
@@ -135,9 +130,9 @@ export function DocumentReview({
   const [loadingUrl, setLoadingUrl] = useState(false);
   const [zoom, setZoom] = useState(1);
 
-  const initial = useMemo(() => flatten(data), [data]);
-  const [fields, setFields] = useState<Record<string, string>>(initial);
-  useEffect(() => setFields(initial), [initial]);
+  const [fields, setFields] = useState<Record<string, string>>(() =>
+    flatten(data),
+  );
 
   const validated = status === "validated";
   const readOnly = !canEdit || validated;
@@ -147,15 +142,15 @@ export function DocumentReview({
   );
   const isImage = mime.startsWith("image/");
 
-  useEffect(() => {
-    if (!open || url || loadingUrl) return;
+  function ensureUrl() {
+    if (url || loadingUrl) return;
     setLoadingUrl(true);
     getDocumentSignedUrl(documentId)
       .then((r) => {
         if (r.ok) setUrl(r.data.url);
       })
       .finally(() => setLoadingUrl(false));
-  }, [open, url, loadingUrl, documentId]);
+  }
 
   // Agrupa los campos planos por su primer segmento → secciones legibles.
   const groups = useMemo(() => {
@@ -194,7 +189,13 @@ export function DocumentReview({
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={open}
+      onOpenChange={(o: boolean) => {
+        setOpen(o);
+        if (o) ensureUrl();
+      }}
+    >
       <SheetTrigger
         render={
           <Button size="sm" variant={validated ? "outline" : "default"}>

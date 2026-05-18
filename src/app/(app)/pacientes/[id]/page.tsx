@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, FileText, ShieldCheck, Stethoscope } from "lucide-react";
+import { ArrowLeft, FileText, Stethoscope } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/session";
 import { ROLES, hasAnyRole } from "@/lib/auth/roles";
@@ -36,13 +36,6 @@ const DOC_LABEL: Record<string, string> = {
   comprobante_pago: "Comprobante",
   estudio: "Estudio",
   otro: "Documento",
-};
-const DOC_STATUS: Record<string, string> = {
-  uploaded: "bg-muted text-muted-foreground",
-  extracting: "bg-info/12 text-info border-info/20",
-  in_review: "bg-warning/15 text-warning-foreground border-warning/30",
-  validated: "bg-success/12 text-success border-success/20",
-  failed: "bg-destructive/10 text-destructive border-destructive/20",
 };
 const TABS = [
   { id: "resumen", label: "Resumen" },
@@ -316,70 +309,87 @@ export default async function PatientPage({
 
       {tab === "documentos" && (
         <section className="space-y-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <FileText className="text-muted-foreground size-4" />
-            Documentos digitalizados ({documents.length})
-          </h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              <FileText className="text-muted-foreground size-4" />
+              Documentos digitalizados ({documents.length})
+            </h2>
+            {canUpload && <DocumentUpload patientId={patient.id} />}
+          </div>
           {documents.length === 0 ? (
-            <Card className="text-muted-foreground p-10 text-center text-sm">
-              Sin documentos. Escaneá la Ficha / Test / HC / Consentimiento —
-              la IA los digitaliza y luego validás los datos.
-            </Card>
+            <EmptyState
+              icon={FileText}
+              title="Sin documentos todavía"
+              description="Escaneá la Ficha de Ingreso, el Test, la Historia Clínica o el Consentimiento. La IA los digitaliza y después validás los datos contra el papel."
+              action={
+                canUpload ? (
+                  <DocumentUpload patientId={patient.id} />
+                ) : undefined
+              }
+            />
           ) : (
-            <div className="space-y-3">
+            <div className="grid gap-3">
               {documents.map((doc) => {
                 const ext = Array.isArray(doc.document_extractions)
                   ? doc.document_extractions[0]
                   : null;
+                const conf =
+                  ext?.confidence != null
+                    ? Math.round(Number(ext.confidence) * 100)
+                    : null;
+                const reviewable =
+                  ext &&
+                  (ext.status === "in_review" ||
+                    ext.status === "validated");
                 return (
-                  <Card key={doc.id} className="overflow-hidden p-0">
-                    <div className="flex flex-wrap items-center gap-3 px-5 py-4">
-                      <div className="bg-muted grid size-9 place-items-center rounded-lg">
-                        <FileText className="size-4" />
+                  <Card key={doc.id} className="hairline-top p-0">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4">
+                      <div className="bg-primary/10 text-primary ring-primary/10 grid size-10 place-items-center rounded-xl ring-1">
+                        <FileText className="size-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-semibold tracking-tight">
                           {DOC_LABEL[doc.doc_type] ?? doc.doc_type}
                         </p>
-                        <p className="text-muted-foreground text-xs">
+                        <p className="text-muted-foreground text-xs tabular-nums">
                           {new Date(doc.created_at).toLocaleString("es-AR")}
-                          {ext?.confidence != null &&
-                            ` · IA ${Math.round(Number(ext.confidence) * 100)}%`}
+                          {conf != null && ` · IA ${conf}%`}
                         </p>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={DOC_STATUS[doc.status] ?? ""}
-                      >
-                        {doc.status === "validated" && (
-                          <ShieldCheck className="size-3" />
-                        )}
-                        {doc.status.replace("_", " ")}
-                      </Badge>
-                      <DocumentViewerButton documentId={doc.id} />
-                      {ext?.status === "validated" && canClinical && (
-                        <PromoteExtractionButton
+                      <div className="hidden sm:block">
+                        <StatusTimeline status={doc.status} />
+                      </div>
+                      {reviewable && ext ? (
+                        <DocumentReview
                           extractionId={ext.id}
+                          documentId={doc.id}
                           patientId={id}
-                        />
-                      )}
-                    </div>
-                    {ext &&
-                      (ext.status === "in_review" ||
-                        ext.status === "validated") && (
-                        <ExtractionReview
-                          extractionId={ext.id}
-                          docType={doc.doc_type}
+                          docLabel={DOC_LABEL[doc.doc_type] ?? doc.doc_type}
                           data={ext.data as Record<string, unknown>}
-                          readOnly={!canClinical || ext.status === "validated"}
-                          validated={ext.status === "validated"}
+                          mime={doc.mime}
+                          confidence={
+                            ext.confidence != null
+                              ? Number(ext.confidence)
+                              : 0.5
+                          }
+                          status={ext.status}
+                          canEdit={canClinical}
+                          canPromote={canClinical}
                         />
-                      )}
+                      ) : doc.status !== "failed" ? (
+                        <span className="text-muted-foreground text-xs">
+                          Procesando…
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="px-5 pb-3 sm:hidden">
+                      <StatusTimeline status={doc.status} />
+                    </div>
                     {ext?.status === "failed" && (
                       <p className="border-destructive/20 bg-destructive/5 text-destructive border-t px-5 py-3 text-xs">
                         Extracción IA fallida:{" "}
                         {ext.error ?? "error desconocido"}. Verificá
-                        ANTHROPIC_API_KEY.
+                        ANTHROPIC_API_KEY o reintentá la subida.
                       </p>
                     )}
                   </Card>
