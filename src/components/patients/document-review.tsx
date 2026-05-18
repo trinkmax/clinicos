@@ -4,7 +4,6 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpToLine,
-  FileText,
   Loader2,
   Maximize2,
   ScanSearch,
@@ -128,6 +127,7 @@ export function DocumentReview({
   const [tab, setTab] = useState<"doc" | "datos">("datos");
   const [url, setUrl] = useState<string | null>(null);
   const [loadingUrl, setLoadingUrl] = useState(false);
+  const [docBroken, setDocBroken] = useState(false);
   const [zoom, setZoom] = useState(1);
 
   const [fields, setFields] = useState<Record<string, string>>(() =>
@@ -141,6 +141,9 @@ export function DocumentReview({
       ?.uncertain_fields ?? []) as string[],
   );
   const isImage = mime.startsWith("image/");
+  // Mostramos el panel del documento sólo si se está cargando o hay archivo.
+  // Si no hay (p. ej. datos seed), los campos ocupan todo el ancho.
+  const showDoc = loadingUrl || (!!url && !docBroken);
 
   function ensureUrl() {
     if (url || loadingUrl) return;
@@ -211,7 +214,11 @@ export function DocumentReview({
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="flex w-screen flex-col gap-0 p-0 sm:max-w-[min(96vw,1080px)]"
+        className={cn(
+          "flex flex-col gap-0 p-0",
+          "w-screen data-[side=right]:w-screen",
+          "sm:max-w-[min(96vw,1320px)] data-[side=right]:sm:max-w-[min(96vw,1320px)]",
+        )}
       >
         {/* Encabezado */}
         <div className="flex items-center justify-between gap-3 border-b px-5 py-3.5">
@@ -255,26 +262,34 @@ export function DocumentReview({
           </div>
         </div>
 
-        {/* Conmutador mobile */}
-        <div className="flex gap-1 border-b p-2 lg:hidden">
-          {(["doc", "datos"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={cn(
-                "flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors",
-                tab === t
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground",
-              )}
-            >
-              {t === "doc" ? "Documento" : "Datos extraídos"}
-            </button>
-          ))}
-        </div>
+        {/* Conmutador mobile (sólo si hay documento que mostrar) */}
+        {showDoc && (
+          <div className="flex gap-1 border-b p-2 lg:hidden">
+            {(["doc", "datos"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={cn(
+                  "flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors",
+                  tab === t
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground",
+                )}
+              >
+                {t === "doc" ? "Documento" : "Datos extraídos"}
+              </button>
+            ))}
+          </div>
+        )}
 
-        <div className="grid min-h-0 flex-1 lg:grid-cols-2">
+        <div
+          className={cn(
+            "grid min-h-0 flex-1",
+            showDoc && "lg:grid-cols-2",
+          )}
+        >
           {/* Documento original */}
+          {showDoc && (
           <div
             className={cn(
               "bg-muted/40 relative min-h-0 overflow-auto border-r",
@@ -283,12 +298,8 @@ export function DocumentReview({
           >
             {loadingUrl || !url ? (
               <div className="text-muted-foreground grid h-full place-items-center gap-2 p-8 text-center text-sm">
-                {loadingUrl ? (
-                  <Loader2 className="size-6 animate-spin" />
-                ) : (
-                  <FileText className="size-8 opacity-50" />
-                )}
-                {loadingUrl ? "Cargando el escaneo…" : "Documento no disponible"}
+                <Loader2 className="size-6 animate-spin" />
+                Cargando el escaneo…
               </div>
             ) : isImage ? (
               <div className="relative">
@@ -331,6 +342,7 @@ export function DocumentReview({
                 <img
                   src={url}
                   alt="Documento escaneado"
+                  onError={() => setDocBroken(true)}
                   className="origin-top-left transition-transform"
                   style={{ width: `${zoom * 100}%` }}
                 />
@@ -343,15 +355,20 @@ export function DocumentReview({
               />
             )}
           </div>
+          )}
 
           {/* Datos extraídos */}
           <div
             className={cn(
               "min-h-0 overflow-y-auto",
-              tab === "datos" ? "block" : "hidden lg:block",
+              !showDoc
+                ? "block"
+                : tab === "datos"
+                  ? "block"
+                  : "hidden lg:block",
             )}
           >
-            <div className="space-y-5 p-5">
+            <div className="mx-auto max-w-5xl space-y-5 p-5">
               {groups.length === 0 && (
                 <p className="text-muted-foreground text-sm">
                   La IA no extrajo campos estructurados.
@@ -362,7 +379,12 @@ export function DocumentReview({
                   <h3 className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
                     {humanize(section)}
                   </h3>
-                  <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+                  <div
+                    className={cn(
+                      "grid gap-x-5 gap-y-3 sm:grid-cols-2",
+                      !showDoc && "xl:grid-cols-3",
+                    )}
+                  >
                     {items.map(([path, value]) => {
                       const leaf = path.split(".").pop()!;
                       const flagged =

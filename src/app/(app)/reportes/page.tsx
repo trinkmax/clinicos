@@ -20,10 +20,10 @@ import { financeOverview } from "@/lib/data/finance";
 import { formatARS } from "@/lib/validation/commercial";
 import { FOLLOWUP_TIPO_LABEL } from "@/lib/validation/operations";
 import { Card } from "@/components/ui/card";
-import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Donut, Bars, type DonutSegment } from "@/components/charts/charts";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { ReportesKpis } from "@/components/reportes/reportes-kpis";
 import { RegisterPaymentDialog } from "@/components/commercial/register-payment-dialog";
 
 export const metadata: Metadata = { title: "Reportes" };
@@ -80,51 +80,40 @@ export default async function ReportesPage() {
         </header>
       </Reveal>
 
-      {/* KPIs */}
-      <Stagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
+      {/* KPIs (isla cliente: el server pasa solo datos serializables) */}
+      <ReportesKpis
+        kpis={[
           {
             label: "Pacientes",
             value: totalPacientes,
-            icon: Users,
+            icon: "users",
             accent: "var(--primary)",
           },
           {
             label: "Facturado",
             value: fin.facturado,
-            icon: Wallet,
+            icon: "wallet",
             accent: "var(--chart-2)",
-            format: formatARS,
+            money: true,
           },
           {
             label: "Cobrado",
             value: fin.cobrado,
-            icon: TrendingUp,
+            icon: "trending",
             accent: "var(--success)",
-            format: formatARS,
+            money: true,
             hint: `${formatARS(fin.cobradoMes)} este mes`,
           },
           {
             label: "Por cobrar",
             value: fin.saldo,
-            icon: HandCoins,
+            icon: "coins",
             accent: "var(--destructive)",
-            format: formatARS,
+            money: true,
             hint: `${fin.planesConSaldo} planes · ${fin.enMora} en mora`,
           },
-        ].map((k) => (
-          <StaggerItem key={k.label}>
-            <StatCard
-              label={k.label}
-              value={k.value}
-              icon={k.icon}
-              accent={k.accent}
-              format={k.format}
-              hint={k.hint}
-            />
-          </StaggerItem>
-        ))}
-      </Stagger>
+        ]}
+      />
 
       {/* Embudo + ingresos */}
       <div className="grid gap-4 lg:grid-cols-2">
@@ -161,7 +150,7 @@ export default async function ReportesPage() {
                   value: r.cobrado,
                   sub: `${r.planes} planes`,
                 }))}
-                format={formatARS}
+                currency
               />
             )}
           </Card>
@@ -194,7 +183,7 @@ export default async function ReportesPage() {
                     label: m.label,
                     value: m.value,
                   }))}
-                  format={formatARS}
+                  currency
                 />
               )}
             </Card>
@@ -218,7 +207,7 @@ export default async function ReportesPage() {
                     sub: `${a.count} plan${a.count === 1 ? "" : "es"}`,
                     color: AGING_COLOR[i],
                   }))}
-                  format={formatARS}
+                  currency
                 />
               )}
             </Card>

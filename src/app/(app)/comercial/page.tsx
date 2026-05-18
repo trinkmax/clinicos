@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Wallet, AlertTriangle } from "lucide-react";
+import { Wallet, Package, Truck, Bell, Boxes } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/session";
 import { ROLES } from "@/lib/auth/roles";
@@ -21,8 +21,12 @@ import {
   FOLLOWUP_TIPO_LABEL,
   FOLLOWUP_ESTADO_LABEL,
 } from "@/lib/validation/operations";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { KpiRow } from "@/components/ui/kpi-row";
+import { Reveal } from "@/components/motion/reveal";
 import { RegisterPaymentDialog } from "@/components/commercial/register-payment-dialog";
 import {
   NewProductDialog,
@@ -45,38 +49,12 @@ const ESTADO_STYLE: Record<string, string> = {
   cancelado: "bg-muted text-muted-foreground",
 };
 const TABS = [
-  { id: "planes", label: "Planes" },
-  { id: "entregas", label: "Entregas" },
-  { id: "stock", label: "Stock" },
-  { id: "seguimientos", label: "Seguimientos" },
+  { id: "planes", label: "Planes", icon: Wallet },
+  { id: "entregas", label: "Entregas", icon: Truck },
+  { id: "stock", label: "Stock", icon: Boxes },
+  { id: "seguimientos", label: "Seguimientos", icon: Bell },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
-
-function Kpi({
-  icon: Icon,
-  label,
-  value,
-  accent,
-}: {
-  icon: typeof Wallet;
-  label: string;
-  value: string;
-  accent?: boolean;
-}) {
-  return (
-    <Card className="p-4">
-      <div className="text-muted-foreground flex items-center gap-2 text-xs">
-        <Icon className="size-4" />
-        {label}
-      </div>
-      <p
-        className={`mt-2 text-2xl font-semibold tracking-tight tabular-nums ${accent ? "text-destructive" : ""}`}
-      >
-        {value}
-      </p>
-    </Card>
-  );
-}
 
 export default async function ComercialPage({
   searchParams,
@@ -124,137 +102,212 @@ export default async function ComercialPage({
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Comercial</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Productos, planes, pagos, entregas, stock y seguimiento
-        </p>
-      </header>
+    <div className="mx-auto max-w-6xl space-y-7">
+      <Reveal>
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-1.5">
+            <p className="text-muted-foreground text-sm">Gestión comercial</p>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              Comercial · FIC
+            </h1>
+            <p className="text-muted-foreground text-[15px]">
+              Productos, planes, cobranzas, entregas, stock y adherencia.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <NewProductDialog />
+            <NewPlanDialog patients={patientOpts} products={productOpts} />
+          </div>
+        </header>
+      </Reveal>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi icon={Wallet} label="Facturado" value={formatARS(totals.facturado)} />
-        <Kpi icon={Wallet} label="Cobrado" value={formatARS(totals.cobrado)} />
-        <Kpi
-          icon={Wallet}
-          label="Saldo pendiente"
-          value={formatARS(totals.saldo)}
-          accent={totals.saldo > 0}
-        />
-        <Kpi
-          icon={AlertTriangle}
-          label="Seguim. vencidos"
-          value={String(opTotals.seguimientosVencidos)}
-          accent={opTotals.seguimientosVencidos > 0}
-        />
-      </section>
+      <KpiRow
+        items={[
+          {
+            label: "Facturado",
+            value: totals.facturado,
+            icon: "wallet",
+            accent: "var(--chart-2)",
+            money: true,
+            hint: `${plans.length} planes`,
+          },
+          {
+            label: "Cobrado",
+            value: totals.cobrado,
+            icon: "trending",
+            accent: "var(--success)",
+            money: true,
+          },
+          {
+            label: "Saldo pendiente",
+            value: totals.saldo,
+            icon: "coins",
+            accent: "var(--destructive)",
+            money: true,
+            hint: "por cobrar",
+          },
+          {
+            label: "Seguim. vencidos",
+            value: opTotals.seguimientosVencidos,
+            icon: "alert",
+            accent: "var(--warning)",
+            hint: `${opTotals.seguimientosPendientes} pendientes`,
+          },
+        ]}
+      />
 
-      <nav className="flex gap-1 border-b">
-        {TABS.map((t) => (
-          <Link
-            key={t.id}
-            href={`/comercial?tab=${t.id}`}
-            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-              tab === t.id
-                ? "border-primary text-foreground"
-                : "text-muted-foreground hover:text-foreground border-transparent"
-            }`}
-          >
-            {t.label}
-          </Link>
-        ))}
+      <nav className="flex gap-1 overflow-x-auto border-b">
+        {TABS.map((tt) => {
+          const active = tab === tt.id;
+          return (
+            <Link
+              key={tt.id}
+              href={`/comercial?tab=${tt.id}`}
+              className={cn(
+                "-mb-px inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
+                active
+                  ? "border-primary text-foreground"
+                  : "text-muted-foreground hover:text-foreground border-transparent",
+              )}
+            >
+              <tt.icon className="size-4" />
+              {tt.label}
+            </Link>
+          );
+        })}
       </nav>
 
       {tab === "planes" && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">
-              Planes ({plans.length})
-            </h2>
-            <div className="flex gap-2">
-              <NewProductDialog />
-              <NewPlanDialog patients={patientOpts} products={productOpts} />
-            </div>
-          </div>
+        <Reveal delay={0.04} className="space-y-5">
           {products.length > 0 && (
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {products.map((p) => (
-                <Card key={p.id} className="p-4">
-                  <p className="font-semibold">{p.codigo}</p>
-                  <p className="text-muted-foreground text-xs">{p.nombre}</p>
-                  <p className="mt-2 text-lg font-semibold tabular-nums">
+                <Card key={p.id} className="hairline-top p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-primary/10 text-primary grid size-8 place-items-center rounded-lg">
+                      <Package className="size-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">
+                        {p.codigo}
+                      </p>
+                      <p className="text-muted-foreground truncate text-[11px]">
+                        {p.aplicaciones} aplicaciones
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xl font-semibold tracking-tight tabular-nums">
                     {formatARS(Number(p.precio))}
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    {p.aplicaciones} aplicaciones
                   </p>
                 </Card>
               ))}
             </div>
           )}
+
           {plans.length === 0 ? (
-            <Card className="text-muted-foreground p-10 text-center text-sm">
-              Sin planes. Creá uno con «Nuevo plan».
-            </Card>
+            <EmptyState
+              icon={Wallet}
+              title="Sin planes de tratamiento"
+              description="Creá el primer plan FIC para un paciente y registrá sus pagos y entregas."
+              action={
+                <NewPlanDialog
+                  patients={patientOpts}
+                  products={productOpts}
+                />
+              }
+            />
           ) : (
-            <Card className="overflow-hidden p-0">
-              <ul className="divide-y">
-                {plans.map((pl) => (
-                  <li
-                    key={pl.id}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {pl.patient
-                          ? `${pl.patient.apellido}, ${pl.patient.nombres}`
-                          : "Paciente"}
-                        {pl.product && (
-                          <span className="text-muted-foreground">
-                            {" "}
-                            · {pl.product.codigo}
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        {pl.descripcion ?? "Plan de tratamiento"} ·{" "}
-                        {pl.cant_aplicaciones} aplic.
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-muted-foreground text-xs">
-                        {formatARS(pl.pagado)} / {formatARS(pl.costo_total)}
-                      </p>
-                      <p
-                        className={`text-sm font-semibold tabular-nums ${pl.saldo > 0 ? "text-destructive" : "text-success"}`}
-                      >
-                        Saldo {formatARS(pl.saldo)}
-                      </p>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={ESTADO_STYLE[pl.estado] ?? ""}
+            <Card className="p-0">
+              <div className="text-muted-foreground flex items-center justify-between px-5 py-3 text-xs font-medium">
+                <span>{plans.length} planes</span>
+                <span>cobrado / total</span>
+              </div>
+              <ul className="border-t">
+                {plans.map((pl) => {
+                  const pct =
+                    pl.costo_total > 0
+                      ? Math.min(
+                          100,
+                          Math.round((pl.pagado / pl.costo_total) * 100),
+                        )
+                      : 0;
+                  return (
+                    <li
+                      key={pl.id}
+                      className="hover:bg-accent/30 flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 transition-colors"
                     >
-                      {PLAN_ESTADO_LABEL[pl.estado]}
-                    </Badge>
-                    <ScheduleFollowUpsButton planId={pl.id} />
-                    <RegisterPaymentDialog
-                      planId={pl.id}
-                      patientId={pl.patient_id}
-                      saldo={pl.saldo}
-                    />
-                  </li>
-                ))}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {pl.patient
+                            ? `${pl.patient.apellido}, ${pl.patient.nombres}`
+                            : "Paciente"}
+                          {pl.product && (
+                            <span className="text-muted-foreground">
+                              {" "}
+                              · {pl.product.codigo}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {pl.descripcion ?? "Plan de tratamiento"} ·{" "}
+                          {pl.cant_aplicaciones} aplic.
+                        </p>
+                        <div className="bg-muted mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full">
+                          <div
+                            className={cn(
+                              "h-full rounded-full",
+                              pct >= 100
+                                ? "bg-success"
+                                : pl.saldo > 0
+                                  ? "bg-primary"
+                                  : "bg-success",
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-muted-foreground text-xs tabular-nums">
+                          {formatARS(pl.pagado)} /{" "}
+                          {formatARS(pl.costo_total)}
+                        </p>
+                        <p
+                          className={cn(
+                            "text-sm font-semibold tabular-nums",
+                            pl.saldo > 0
+                              ? "text-destructive"
+                              : "text-success",
+                          )}
+                        >
+                          Saldo {formatARS(pl.saldo)}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={ESTADO_STYLE[pl.estado] ?? ""}
+                      >
+                        {PLAN_ESTADO_LABEL[pl.estado]}
+                      </Badge>
+                      <ScheduleFollowUpsButton planId={pl.id} />
+                      <RegisterPaymentDialog
+                        planId={pl.id}
+                        patientId={pl.patient_id}
+                        saldo={pl.saldo}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </Card>
           )}
-        </section>
+        </Reveal>
       )}
 
       {tab === "entregas" && (
-        <section className="space-y-4">
+        <Reveal delay={0.04} className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              <Truck className="text-muted-foreground size-4" />
               Entregas ({deliveries.length})
             </h2>
             <RegisterDeliveryDialog
@@ -263,17 +316,22 @@ export default async function ComercialPage({
             />
           </div>
           {deliveries.length === 0 ? (
-            <Card className="text-muted-foreground p-10 text-center text-sm">
-              Sin entregas registradas.
-            </Card>
+            <EmptyState
+              icon={Truck}
+              title="Sin entregas registradas"
+              description="Cada retiro de aplicación FIC queda asentado acá, descontando stock."
+            />
           ) : (
-            <Card className="overflow-hidden p-0">
+            <Card className="p-0">
               <ul className="divide-y">
                 {deliveries.map((d) => (
                   <li
                     key={d.id}
                     className="flex items-center gap-4 px-5 py-3.5"
                   >
+                    <span className="bg-primary/10 text-primary grid size-9 shrink-0 place-items-center rounded-lg">
+                      <Truck className="size-4" />
+                    </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
                         {d.patient
@@ -292,32 +350,39 @@ export default async function ComercialPage({
               </ul>
             </Card>
           )}
-        </section>
+        </Reveal>
       )}
 
       {tab === "stock" && (
-        <section className="space-y-4">
+        <Reveal delay={0.04} className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">
-              Stock ({inventory.length}) ·{" "}
-              <span
-                className={
-                  opTotals.stockBajo > 0 ? "text-destructive" : ""
-                }
-              >
-                {opTotals.stockBajo} bajo mínimo
-              </span>
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              <Boxes className="text-muted-foreground size-4" />
+              Stock ({inventory.length})
+              {opTotals.stockBajo > 0 && (
+                <span className="bg-destructive/10 text-destructive rounded-full px-2 py-0.5 text-[11px] font-medium">
+                  {opTotals.stockBajo} bajo mínimo
+                </span>
+              )}
             </h2>
             <NewInventoryDialog />
           </div>
           {inventory.length === 0 ? (
-            <Card className="text-muted-foreground p-10 text-center text-sm">
-              Sin ítems de stock.
-            </Card>
+            <EmptyState
+              icon={Boxes}
+              title="Sin ítems de stock"
+              description="Cargá insumos (ampollas FIC, agujas…) para controlar existencias y mínimos."
+            />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {inventory.map((i) => (
-                <Card key={i.id} className="p-4">
+                <Card
+                  key={i.id}
+                  className={cn(
+                    "hairline-top p-4",
+                    i.low && "ring-destructive/25",
+                  )}
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-medium">{i.nombre}</p>
@@ -327,7 +392,6 @@ export default async function ComercialPage({
                     </div>
                     {i.low && (
                       <Badge className="bg-destructive/10 text-destructive border-destructive/20 gap-1">
-                        <AlertTriangle className="size-3" />
                         Bajo
                       </Badge>
                     )}
@@ -345,22 +409,24 @@ export default async function ComercialPage({
               ))}
             </div>
           )}
-        </section>
+        </Reveal>
       )}
 
       {tab === "seguimientos" && (
-        <section className="space-y-4">
-          <h2 className="text-sm font-semibold">
-            Seguimientos ({followUps.length}) · {opTotals.seguimientosPendientes}{" "}
-            pendientes
+        <Reveal delay={0.04} className="space-y-4">
+          <h2 className="flex items-center gap-2 text-sm font-semibold">
+            <Bell className="text-muted-foreground size-4" />
+            Seguimientos ({followUps.length}) ·{" "}
+            {opTotals.seguimientosPendientes} pendientes
           </h2>
           {followUps.length === 0 ? (
-            <Card className="text-muted-foreground p-10 text-center text-sm">
-              Sin seguimientos. Se generan con «Agendar 15/30/60» desde un
-              plan.
-            </Card>
+            <EmptyState
+              icon={Bell}
+              title="Sin seguimientos"
+              description="Se generan con «Agendar 15/30/60» desde un plan de tratamiento."
+            />
           ) : (
-            <Card className="overflow-hidden p-0">
+            <Card className="p-0">
               <ul className="divide-y">
                 {followUps.map((f) => {
                   const overdue =
@@ -370,6 +436,16 @@ export default async function ComercialPage({
                       key={f.id}
                       className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3.5"
                     >
+                      <span
+                        className={cn(
+                          "size-2 shrink-0 rounded-full",
+                          overdue
+                            ? "bg-destructive"
+                            : f.estado === "hecho"
+                              ? "bg-success"
+                              : "bg-warning",
+                        )}
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">
                           {f.patient
@@ -381,7 +457,12 @@ export default async function ComercialPage({
                         </p>
                       </div>
                       <span
-                        className={`text-xs tabular-nums ${overdue ? "text-destructive font-medium" : "text-muted-foreground"}`}
+                        className={cn(
+                          "text-xs tabular-nums",
+                          overdue
+                            ? "text-destructive font-medium"
+                            : "text-muted-foreground",
+                        )}
                       >
                         {f.due_date}
                         {overdue && " · vencido"}
@@ -407,7 +488,7 @@ export default async function ComercialPage({
               </ul>
             </Card>
           )}
-        </section>
+        </Reveal>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useId, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { formatARS } from "@/lib/validation/commercial";
 
 /** Paleta clínica azul→cian→teal→violeta (espejo de --chart-* en globals). */
 export const CHART_COLORS = [
@@ -227,16 +228,23 @@ export interface BarDatum {
 
 export function Bars({
   data,
-  format = (n) => n.toLocaleString("es-AR"),
+  format,
+  currency = false,
   className,
 }: {
   data: BarDatum[];
+  /** Solo para callers cliente. Desde un Server Component usá `currency`. */
   format?: (n: number) => string;
+  /** Formatea como ARS internamente (serializable, cruza server→client). */
+  currency?: boolean;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-30px" });
   const reduce = useReducedMotion();
+  const fmt =
+    format ??
+    (currency ? formatARS : (n: number) => n.toLocaleString("es-AR"));
   const max = Math.max(1, ...data.map((d) => d.value));
 
   return (
@@ -255,7 +263,7 @@ export function Bars({
                 )}
               </span>
               <span className="tabular-nums font-semibold">
-                {format(d.value)}
+                {fmt(d.value)}
               </span>
             </div>
             <div className="bg-muted h-2.5 w-full overflow-hidden rounded-full">

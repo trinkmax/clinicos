@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Users, UserCheck, Bell, TrendingUp } from "lucide-react";
+import { TrendingUp, Layers, Megaphone } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/session";
 import { ROLES } from "@/lib/auth/roles";
@@ -13,8 +13,13 @@ import { listTemplates } from "@/lib/data/crm";
 import { FUENTE_LABEL } from "@/lib/validation/crm";
 import { CAMPAIGN_ESTADO_LABEL } from "@/lib/validation/marketing";
 import { formatARS } from "@/lib/validation/commercial";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { KpiRow } from "@/components/ui/kpi-row";
+import { Bars } from "@/components/charts/charts";
+import { Reveal } from "@/components/motion/reveal";
 import {
   NewSegmentDialog,
   NewCampaignDialog,
@@ -38,119 +43,130 @@ export default async function MarketingPage() {
       listTemplates(),
     ]);
 
-  return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Marketing</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Segmentos, campañas y atribución de fuente a ingreso
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <NewSegmentDialog />
-          <NewCampaignDialog
-            segments={segments.map((s) => ({ id: s.id, nombre: s.nombre }))}
-            templates={templates.map((t) => ({
-              id: t.id,
-              nombre: t.nombre,
-            }))}
-          />
-        </div>
-      </header>
+  const ingresoTotal = attribution.reduce((s, a) => s + a.ingreso, 0);
+  const bars = attribution
+    .filter((a) => a.ingreso > 0)
+    .map((a) => ({
+      label: FUENTE_LABEL[a.fuente as keyof typeof FUENTE_LABEL] ?? a.fuente,
+      value: a.ingreso,
+      sub: `${a.contactos} contactos${a.roi != null ? ` · ROI ${a.roi.toFixed(1)}×` : ""}`,
+    }));
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        {[
-          { icon: Users, label: "Leads", value: stats.leads },
-          { icon: UserCheck, label: "Pacientes", value: stats.pacientes },
+  return (
+    <div className="mx-auto max-w-6xl space-y-7">
+      <Reveal>
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-1.5">
+            <p className="text-muted-foreground text-sm">Crecimiento</p>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              Marketing
+            </h1>
+            <p className="text-muted-foreground text-[15px]">
+              Segmentos, campañas y atribución de fuente a ingreso.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <NewSegmentDialog />
+            <NewCampaignDialog
+              segments={segments.map((s) => ({
+                id: s.id,
+                nombre: s.nombre,
+              }))}
+              templates={templates.map((t) => ({
+                id: t.id,
+                nombre: t.nombre,
+              }))}
+            />
+          </div>
+        </header>
+      </Reveal>
+
+      <KpiRow
+        items={[
           {
-            icon: Bell,
+            label: "Leads",
+            value: stats.leads,
+            icon: "users",
+            accent: "var(--chart-3)",
+          },
+          {
+            label: "Pacientes",
+            value: stats.pacientes,
+            icon: "check",
+            accent: "var(--success)",
+          },
+          {
             label: "Seguim. pendientes",
             value: stats.seguimientosPendientes,
+            icon: "bell",
+            accent: "var(--warning)",
           },
-        ].map((k) => (
-          <Card key={k.label} className="p-4">
-            <div className="text-muted-foreground flex items-center gap-2 text-xs">
-              <k.icon className="size-4" />
-              {k.label}
-            </div>
-            <p className="mt-2 text-2xl font-semibold tabular-nums">
-              {k.value}
-            </p>
-          </Card>
-        ))}
-      </section>
+          {
+            label: "Ingreso atribuido",
+            value: ingresoTotal,
+            icon: "trending",
+            accent: "var(--primary)",
+            money: true,
+          },
+        ]}
+      />
 
-      <section className="space-y-3">
-        <h2 className="flex items-center gap-2 text-sm font-semibold">
-          <TrendingUp className="text-muted-foreground size-4" />
-          Atribución por fuente
-        </h2>
-        <Card className="overflow-hidden p-0">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-muted-foreground text-xs">
-              <tr>
-                <th className="px-4 py-2.5 text-left font-medium">Fuente</th>
-                <th className="px-4 py-2.5 text-right font-medium">
-                  Contactos
-                </th>
-                <th className="px-4 py-2.5 text-right font-medium">Costo</th>
-                <th className="px-4 py-2.5 text-right font-medium">Ingreso</th>
-                <th className="px-4 py-2.5 text-right font-medium">ROI</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {attribution.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="text-muted-foreground px-4 py-8 text-center"
+      <Reveal delay={0.04}>
+        <Card className="p-5">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold tracking-tight">
+            <TrendingUp className="text-muted-foreground size-4" />
+            Atribución · ingreso por fuente
+          </h2>
+          {bars.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              Sin datos de atribución todavía.
+            </p>
+          ) : (
+            <>
+              <Bars data={bars} currency />
+              <div className="mt-5 grid gap-2 border-t pt-4 sm:grid-cols-2 lg:grid-cols-3">
+                {attribution.map((a) => (
+                  <div
+                    key={a.fuente}
+                    className="flex items-center justify-between gap-3 text-xs"
                   >
-                    Sin datos de atribución todavía.
-                  </td>
-                </tr>
-              ) : (
-                attribution.map((a) => (
-                  <tr key={a.fuente}>
-                    <td className="px-4 py-2.5">
+                    <span className="text-muted-foreground">
                       {FUENTE_LABEL[
                         a.fuente as keyof typeof FUENTE_LABEL
                       ] ?? a.fuente}
-                    </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">
-                      {a.contactos}
-                    </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">
-                      {formatARS(a.costo)}
-                    </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">
-                      {formatARS(a.ingreso)}
-                    </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">
-                      {a.roi == null ? "—" : `${a.roi.toFixed(1)}×`}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    </span>
+                    <span className="tabular-nums">
+                      {formatARS(a.costo)} →{" "}
+                      <span className="text-foreground font-medium">
+                        {a.roi == null ? "—" : `${a.roi.toFixed(1)}×`}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </Card>
-      </section>
+      </Reveal>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Reveal delay={0.06} className="space-y-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+            <Layers className="text-muted-foreground size-4" />
             Segmentos ({segments.length})
           </h2>
           {segments.length === 0 ? (
-            <Card className="text-muted-foreground p-6 text-center text-sm">
-              Sin segmentos.
-            </Card>
+            <EmptyState
+              icon={Layers}
+              title="Sin segmentos"
+              description="Agrupá contactos por reglas dinámicas para campañas dirigidas."
+              className="py-12"
+            />
           ) : (
             <div className="space-y-2">
               {segments.map((s) => (
-                <Card key={s.id} className="p-4">
-                  <p className="text-sm font-medium">{s.nombre}</p>
+                <Card key={s.id} className="hairline-top p-4">
+                  <p className="text-sm font-semibold">{s.nombre}</p>
                   <p className="text-muted-foreground text-xs">
                     {s.descripcion ?? "Segmento dinámico"}
                   </p>
@@ -158,32 +174,45 @@ export default async function MarketingPage() {
               ))}
             </div>
           )}
-        </section>
+        </Reveal>
 
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">
+        <Reveal delay={0.08} className="space-y-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+            <Megaphone className="text-muted-foreground size-4" />
             Campañas ({campaigns.length})
           </h2>
           {campaigns.length === 0 ? (
-            <Card className="text-muted-foreground p-6 text-center text-sm">
-              Sin campañas.
-            </Card>
+            <EmptyState
+              icon={Megaphone}
+              title="Sin campañas"
+              description="Creá una campaña sobre un segmento con una plantilla de mensaje."
+              className="py-12"
+            />
           ) : (
             <div className="space-y-2">
               {campaigns.map((c) => (
                 <Card
                   key={c.id}
-                  className="flex items-center justify-between p-4"
+                  className="hairline-top flex items-center justify-between p-4"
                 >
                   <p className="text-sm font-medium">{c.nombre}</p>
-                  <Badge variant="secondary">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      c.estado === "enviada"
+                        ? "bg-success/12 text-success border-success/20"
+                        : c.estado === "enviando"
+                          ? "bg-info/12 text-info border-info/20"
+                          : "bg-muted text-muted-foreground",
+                    )}
+                  >
                     {CAMPAIGN_ESTADO_LABEL[c.estado]}
                   </Badge>
                 </Card>
               ))}
             </div>
           )}
-        </section>
+        </Reveal>
       </div>
     </div>
   );
