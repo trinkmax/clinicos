@@ -1,0 +1,24 @@
+# Qué NO sube a Vercel (la app Next.js se buildea solo desde la raíz).
+# .gitignore ya excluye Info/ del repo; esto es defensa en profundidad
+# por si se hace `vercel deploy` desde local con la CLI.
+
+# ⚠️ PHI/PII real — JAMÁS subir a Vercel
+Info/
+
+# Worker WhatsApp: se deploya aparte (Railway/Fly), no en Vercel
+worker/
+
+# No se necesitan en el runtime de la app
+supabase/
+scripts/
+e2e/
+playwright.config.ts
+
+# Docs / tooling de agentes
+.agents/
+.claude/
+.mcp.json
+skills-lock.json
+AGENTS.md
+CLAUDE.md
+README.md
