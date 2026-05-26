@@ -1,7 +1,3 @@
-/**
- * Tipos de la base generados por Supabase.  NO editar a mano.
- * Regenerar tras cada cambio de schema:  pnpm db:types
- */
 export type Json =
   | string
   | number
@@ -11,11 +7,54 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
+      ad_sources: {
+        Row: {
+          activo: boolean
+          config: Json
+          created_at: string
+          id: string
+          nombre: string
+          plataforma: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          config?: Json
+          created_at?: string
+          id?: string
+          nombre: string
+          plataforma: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          config?: Json
+          created_at?: string
+          id?: string
+          nombre?: string
+          plataforma?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_sources_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           abono: boolean
@@ -82,390 +121,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "appointments_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_episodes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      availability_templates: {
-        Row: {
-          activo: boolean
-          created_at: string
-          dia_semana: number
-          hora_fin: string
-          hora_inicio: string
-          id: string
-          profesional_id: string | null
-          slot_min: number
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          activo?: boolean
-          created_at?: string
-          dia_semana: number
-          hora_fin: string
-          hora_inicio: string
-          id?: string
-          profesional_id?: string | null
-          slot_min?: number
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          activo?: boolean
-          created_at?: string
-          dia_semana?: number
-          hora_fin?: string
-          hora_inicio?: string
-          id?: string
-          profesional_id?: string | null
-          slot_min?: number
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      products: {
-        Row: {
-          activo: boolean
-          aplicaciones: number
-          codigo: string
-          created_at: string
-          id: string
-          nombre: string
-          precio: number
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          activo?: boolean
-          aplicaciones?: number
-          codigo: string
-          created_at?: string
-          id?: string
-          nombre: string
-          precio?: number
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          activo?: boolean
-          aplicaciones?: number
-          codigo?: string
-          created_at?: string
-          id?: string
-          nombre?: string
-          precio?: number
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      treatment_plans: {
-        Row: {
-          cant_aplicaciones: number
-          costo_total: number
-          created_at: string
-          created_by: string | null
-          descripcion: string | null
-          episode_id: string | null
-          estado: Database["public"]["Enums"]["plan_estado"]
-          fin: string | null
-          id: string
-          inicio: string | null
-          notas: string | null
-          patient_id: string
-          product_id: string | null
-          profesional_id: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          cant_aplicaciones?: number
-          costo_total?: number
-          created_at?: string
-          created_by?: string | null
-          descripcion?: string | null
-          episode_id?: string | null
-          estado?: Database["public"]["Enums"]["plan_estado"]
-          fin?: string | null
-          id?: string
-          inicio?: string | null
-          notas?: string | null
-          patient_id: string
-          product_id?: string | null
-          profesional_id?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          cant_aplicaciones?: number
-          costo_total?: number
-          created_at?: string
-          created_by?: string | null
-          descripcion?: string | null
-          episode_id?: string | null
-          estado?: Database["public"]["Enums"]["plan_estado"]
-          fin?: string | null
-          id?: string
-          inicio?: string | null
-          notas?: string | null
-          patient_id?: string
-          product_id?: string | null
-          profesional_id?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "treatment_plans_patient_id_fkey"
-            columns: ["patient_id"]
+            foreignKeyName: "appointments_tenant_id_fkey"
+            columns: ["tenant_id"]
             isOneToOne: false
-            referencedRelation: "patients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "treatment_plans_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
-      }
-      payments: {
-        Row: {
-          comprobante_doc_id: string | null
-          created_at: string
-          created_by: string | null
-          fecha: string
-          id: string
-          importe: number
-          medio: string | null
-          notas: string | null
-          patient_id: string
-          plan_id: string
-          tenant_id: string
-        }
-        Insert: {
-          comprobante_doc_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          fecha?: string
-          id?: string
-          importe: number
-          medio?: string | null
-          notas?: string | null
-          patient_id: string
-          plan_id: string
-          tenant_id: string
-        }
-        Update: {
-          comprobante_doc_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          fecha?: string
-          id?: string
-          importe?: number
-          medio?: string | null
-          notas?: string | null
-          patient_id?: string
-          plan_id?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payments_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "treatment_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      segments: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          definicion: Json
-          descripcion: string | null
-          id: string
-          nombre: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          definicion?: Json
-          descripcion?: string | null
-          id?: string
-          nombre: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          definicion?: Json
-          descripcion?: string | null
-          id?: string
-          nombre?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      campaigns: {
-        Row: {
-          canal: Database["public"]["Enums"]["channel_tipo"]
-          created_at: string
-          created_by: string | null
-          estado: Database["public"]["Enums"]["campaign_estado"]
-          id: string
-          nombre: string
-          scheduled_at: string | null
-          segment_id: string | null
-          stats: Json
-          template_id: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          canal?: Database["public"]["Enums"]["channel_tipo"]
-          created_at?: string
-          created_by?: string | null
-          estado?: Database["public"]["Enums"]["campaign_estado"]
-          id?: string
-          nombre: string
-          scheduled_at?: string | null
-          segment_id?: string | null
-          stats?: Json
-          template_id?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          canal?: Database["public"]["Enums"]["channel_tipo"]
-          created_at?: string
-          created_by?: string | null
-          estado?: Database["public"]["Enums"]["campaign_estado"]
-          id?: string
-          nombre?: string
-          scheduled_at?: string | null
-          segment_id?: string | null
-          stats?: Json
-          template_id?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      automations: {
-        Row: {
-          acciones: Json
-          activo: boolean
-          created_at: string
-          created_by: string | null
-          id: string
-          nombre: string
-          tenant_id: string
-          trigger: Json
-          updated_at: string
-        }
-        Insert: {
-          acciones?: Json
-          activo?: boolean
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          nombre: string
-          tenant_id: string
-          trigger?: Json
-          updated_at?: string
-        }
-        Update: {
-          acciones?: Json
-          activo?: boolean
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          nombre?: string
-          tenant_id?: string
-          trigger?: Json
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      automation_runs: {
-        Row: {
-          automation_id: string
-          contact_id: string | null
-          created_at: string
-          estado: string
-          id: string
-          log: Json
-          patient_id: string | null
-          tenant_id: string
-        }
-        Insert: {
-          automation_id: string
-          contact_id?: string | null
-          created_at?: string
-          estado?: string
-          id?: string
-          log?: Json
-          patient_id?: string | null
-          tenant_id: string
-        }
-        Update: {
-          automation_id?: string
-          contact_id?: string | null
-          created_at?: string
-          estado?: string
-          id?: string
-          log?: Json
-          patient_id?: string | null
-          tenant_id?: string
-        }
-        Relationships: []
-      }
-      ad_sources: {
-        Row: {
-          activo: boolean
-          config: Json
-          created_at: string
-          id: string
-          nombre: string
-          plataforma: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          activo?: boolean
-          config?: Json
-          created_at?: string
-          id?: string
-          nombre: string
-          plataforma: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          activo?: boolean
-          config?: Json
-          created_at?: string
-          id?: string
-          nombre?: string
-          plataforma?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       attribution: {
         Row: {
@@ -501,425 +177,26 @@ export type Database = {
           tenant_id?: string
           utm?: Json
         }
-        Relationships: []
-      }
-      channels: {
-        Row: {
-          config: Json
-          created_at: string
-          estado: Database["public"]["Enums"]["channel_estado"]
-          id: string
-          nombre: string
-          session: Json
-          tenant_id: string
-          tipo: Database["public"]["Enums"]["channel_tipo"]
-          updated_at: string
-        }
-        Insert: {
-          config?: Json
-          created_at?: string
-          estado?: Database["public"]["Enums"]["channel_estado"]
-          id?: string
-          nombre: string
-          session?: Json
-          tenant_id: string
-          tipo: Database["public"]["Enums"]["channel_tipo"]
-          updated_at?: string
-        }
-        Update: {
-          config?: Json
-          created_at?: string
-          estado?: Database["public"]["Enums"]["channel_estado"]
-          id?: string
-          nombre?: string
-          session?: Json
-          tenant_id?: string
-          tipo?: Database["public"]["Enums"]["channel_tipo"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      contacts: {
-        Row: {
-          asignado_a: string | null
-          created_at: string
-          email: string | null
-          etapa: Database["public"]["Enums"]["contact_etapa"]
-          fuente: Database["public"]["Enums"]["contact_fuente"]
-          id: string
-          last_message_at: string | null
-          nombre: string | null
-          notas: string | null
-          patient_id: string | null
-          tags: string[]
-          telefono: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          asignado_a?: string | null
-          created_at?: string
-          email?: string | null
-          etapa?: Database["public"]["Enums"]["contact_etapa"]
-          fuente?: Database["public"]["Enums"]["contact_fuente"]
-          id?: string
-          last_message_at?: string | null
-          nombre?: string | null
-          notas?: string | null
-          patient_id?: string | null
-          tags?: string[]
-          telefono?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          asignado_a?: string | null
-          created_at?: string
-          email?: string | null
-          etapa?: Database["public"]["Enums"]["contact_etapa"]
-          fuente?: Database["public"]["Enums"]["contact_fuente"]
-          id?: string
-          last_message_at?: string | null
-          nombre?: string | null
-          notas?: string | null
-          patient_id?: string | null
-          tags?: string[]
-          telefono?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
         Relationships: [
           {
-            foreignKeyName: "contacts_patient_id_fkey"
-            columns: ["patient_id"]
-            isOneToOne: false
-            referencedRelation: "patients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      conversations: {
-        Row: {
-          asignado_a: string | null
-          channel_id: string | null
-          contact_id: string
-          created_at: string
-          estado: Database["public"]["Enums"]["conv_estado"]
-          id: string
-          last_message_at: string | null
-          tenant_id: string
-          unread: number
-          updated_at: string
-        }
-        Insert: {
-          asignado_a?: string | null
-          channel_id?: string | null
-          contact_id: string
-          created_at?: string
-          estado?: Database["public"]["Enums"]["conv_estado"]
-          id?: string
-          last_message_at?: string | null
-          tenant_id: string
-          unread?: number
-          updated_at?: string
-        }
-        Update: {
-          asignado_a?: string | null
-          channel_id?: string | null
-          contact_id?: string
-          created_at?: string
-          estado?: Database["public"]["Enums"]["conv_estado"]
-          id?: string
-          last_message_at?: string | null
-          tenant_id?: string
-          unread?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversations_contact_id_fkey"
+            foreignKeyName: "attribution_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      messages: {
-        Row: {
-          contact_id: string
-          contenido: string | null
-          conversation_id: string
-          created_at: string
-          direccion: Database["public"]["Enums"]["msg_dir"]
-          estado: Database["public"]["Enums"]["msg_estado"]
-          id: string
-          media_path: string | null
-          provider_msg_id: string | null
-          sent_by: string | null
-          tenant_id: string
-          tipo: string
-        }
-        Insert: {
-          contact_id: string
-          contenido?: string | null
-          conversation_id: string
-          created_at?: string
-          direccion: Database["public"]["Enums"]["msg_dir"]
-          estado?: Database["public"]["Enums"]["msg_estado"]
-          id?: string
-          media_path?: string | null
-          provider_msg_id?: string | null
-          sent_by?: string | null
-          tenant_id: string
-          tipo?: string
-        }
-        Update: {
-          contact_id?: string
-          contenido?: string | null
-          conversation_id?: string
-          created_at?: string
-          direccion?: Database["public"]["Enums"]["msg_dir"]
-          estado?: Database["public"]["Enums"]["msg_estado"]
-          id?: string
-          media_path?: string | null
-          provider_msg_id?: string | null
-          sent_by?: string | null
-          tenant_id?: string
-          tipo?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      message_templates: {
-        Row: {
-          activo: boolean
-          categoria: string
-          created_at: string
-          created_by: string | null
-          cuerpo: string
-          id: string
-          nombre: string
-          tenant_id: string
-          updated_at: string
-          variables: Json
-        }
-        Insert: {
-          activo?: boolean
-          categoria?: string
-          created_at?: string
-          created_by?: string | null
-          cuerpo: string
-          id?: string
-          nombre: string
-          tenant_id: string
-          updated_at?: string
-          variables?: Json
-        }
-        Update: {
-          activo?: boolean
-          categoria?: string
-          created_at?: string
-          created_by?: string | null
-          cuerpo?: string
-          id?: string
-          nombre?: string
-          tenant_id?: string
-          updated_at?: string
-          variables?: Json
-        }
-        Relationships: []
-      }
-      deliveries: {
-        Row: {
-          cantidad: number
-          created_at: string
-          created_by: string | null
-          detalle: string | null
-          fecha: string
-          id: string
-          patient_id: string
-          plan_id: string | null
-          tenant_id: string
-        }
-        Insert: {
-          cantidad?: number
-          created_at?: string
-          created_by?: string | null
-          detalle?: string | null
-          fecha?: string
-          id?: string
-          patient_id: string
-          plan_id?: string | null
-          tenant_id: string
-        }
-        Update: {
-          cantidad?: number
-          created_at?: string
-          created_by?: string | null
-          detalle?: string | null
-          fecha?: string
-          id?: string
-          patient_id?: string
-          plan_id?: string | null
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "deliveries_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "treatment_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inventory_items: {
-        Row: {
-          created_at: string
-          id: string
-          minimo: number
-          nombre: string
-          product_id: string | null
-          stock: number
-          tenant_id: string
-          unidad: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          minimo?: number
-          nombre: string
-          product_id?: string | null
-          stock?: number
-          tenant_id: string
-          unidad?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          minimo?: number
-          nombre?: string
-          product_id?: string | null
-          stock?: number
-          tenant_id?: string
-          unidad?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      stock_movements: {
-        Row: {
-          cantidad: number
-          created_at: string
-          created_by: string | null
-          id: string
-          item_id: string
-          motivo: string | null
-          ref_delivery_id: string | null
-          tenant_id: string
-          tipo: Database["public"]["Enums"]["stock_mov"]
-        }
-        Insert: {
-          cantidad: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          item_id: string
-          motivo?: string | null
-          ref_delivery_id?: string | null
-          tenant_id: string
-          tipo: Database["public"]["Enums"]["stock_mov"]
-        }
-        Update: {
-          cantidad?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          item_id?: string
-          motivo?: string | null
-          ref_delivery_id?: string | null
-          tenant_id?: string
-          tipo?: Database["public"]["Enums"]["stock_mov"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "stock_movements_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "inventory_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      follow_ups: {
-        Row: {
-          canal: string | null
-          created_at: string
-          done_at: string | null
-          due_date: string
-          episode_id: string | null
-          estado: Database["public"]["Enums"]["followup_estado"]
-          id: string
-          patient_id: string
-          plan_id: string | null
-          resultado: string | null
-          tenant_id: string
-          tipo: Database["public"]["Enums"]["followup_tipo"]
-          updated_at: string
-        }
-        Insert: {
-          canal?: string | null
-          created_at?: string
-          done_at?: string | null
-          due_date: string
-          episode_id?: string | null
-          estado?: Database["public"]["Enums"]["followup_estado"]
-          id?: string
-          patient_id: string
-          plan_id?: string | null
-          resultado?: string | null
-          tenant_id: string
-          tipo: Database["public"]["Enums"]["followup_tipo"]
-          updated_at?: string
-        }
-        Update: {
-          canal?: string | null
-          created_at?: string
-          done_at?: string | null
-          due_date?: string
-          episode_id?: string | null
-          estado?: Database["public"]["Enums"]["followup_estado"]
-          id?: string
-          patient_id?: string
-          plan_id?: string | null
-          resultado?: string | null
-          tenant_id?: string
-          tipo?: Database["public"]["Enums"]["followup_tipo"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "follow_ups_patient_id_fkey"
+            foreignKeyName: "attribution_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "follow_ups_plan_id_fkey"
-            columns: ["plan_id"]
+            foreignKeyName: "attribution_tenant_id_fkey"
+            columns: ["tenant_id"]
             isOneToOne: false
-            referencedRelation: "treatment_plans"
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -969,6 +246,270 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_runs: {
+        Row: {
+          automation_id: string
+          contact_id: string | null
+          created_at: string
+          estado: string
+          id: string
+          log: Json
+          patient_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          automation_id: string
+          contact_id?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          log?: Json
+          patient_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          automation_id?: string
+          contact_id?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          log?: Json
+          patient_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_runs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_runs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_runs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automations: {
+        Row: {
+          acciones: Json
+          activo: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          nombre: string
+          tenant_id: string
+          trigger: Json
+          updated_at: string
+        }
+        Insert: {
+          acciones?: Json
+          activo?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nombre: string
+          tenant_id: string
+          trigger?: Json
+          updated_at?: string
+        }
+        Update: {
+          acciones?: Json
+          activo?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nombre?: string
+          tenant_id?: string
+          trigger?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      availability_templates: {
+        Row: {
+          activo: boolean
+          created_at: string
+          dia_semana: number
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          profesional_id: string | null
+          slot_min: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          dia_semana: number
+          hora_fin: string
+          hora_inicio: string
+          id?: string
+          profesional_id?: string | null
+          slot_min?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          dia_semana?: number
+          hora_fin?: string
+          hora_inicio?: string
+          id?: string
+          profesional_id?: string | null
+          slot_min?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          canal: Database["public"]["Enums"]["channel_tipo"]
+          created_at: string
+          created_by: string | null
+          estado: Database["public"]["Enums"]["campaign_estado"]
+          id: string
+          nombre: string
+          scheduled_at: string | null
+          segment_id: string | null
+          stats: Json
+          template_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          canal?: Database["public"]["Enums"]["channel_tipo"]
+          created_at?: string
+          created_by?: string | null
+          estado?: Database["public"]["Enums"]["campaign_estado"]
+          id?: string
+          nombre: string
+          scheduled_at?: string | null
+          segment_id?: string | null
+          stats?: Json
+          template_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          canal?: Database["public"]["Enums"]["channel_tipo"]
+          created_at?: string
+          created_by?: string | null
+          estado?: Database["public"]["Enums"]["campaign_estado"]
+          id?: string
+          nombre?: string
+          scheduled_at?: string | null
+          segment_id?: string | null
+          stats?: Json
+          template_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "segments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channels: {
+        Row: {
+          config: Json
+          created_at: string
+          estado: Database["public"]["Enums"]["channel_estado"]
+          id: string
+          nombre: string
+          session: Json
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["channel_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          estado?: Database["public"]["Enums"]["channel_estado"]
+          id?: string
+          nombre: string
+          session?: Json
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["channel_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          estado?: Database["public"]["Enums"]["channel_estado"]
+          id?: string
+          nombre?: string
+          session?: Json
+          tenant_id?: string
+          tipo?: Database["public"]["Enums"]["channel_tipo"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channels_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinical_episodes: {
         Row: {
           closed_at: string | null
@@ -1012,6 +553,13 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_episodes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -1126,6 +674,13 @@ export type Database = {
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "clinical_histories_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       clinical_notes: {
@@ -1184,6 +739,13 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_notes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -1265,6 +827,198 @@ export type Database = {
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "consents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          asignado_a: string | null
+          created_at: string
+          email: string | null
+          etapa: Database["public"]["Enums"]["contact_etapa"]
+          fuente: Database["public"]["Enums"]["contact_fuente"]
+          id: string
+          last_message_at: string | null
+          nombre: string | null
+          notas: string | null
+          patient_id: string | null
+          tags: string[]
+          telefono: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          asignado_a?: string | null
+          created_at?: string
+          email?: string | null
+          etapa?: Database["public"]["Enums"]["contact_etapa"]
+          fuente?: Database["public"]["Enums"]["contact_fuente"]
+          id?: string
+          last_message_at?: string | null
+          nombre?: string | null
+          notas?: string | null
+          patient_id?: string | null
+          tags?: string[]
+          telefono?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          asignado_a?: string | null
+          created_at?: string
+          email?: string | null
+          etapa?: Database["public"]["Enums"]["contact_etapa"]
+          fuente?: Database["public"]["Enums"]["contact_fuente"]
+          id?: string
+          last_message_at?: string | null
+          nombre?: string | null
+          notas?: string | null
+          patient_id?: string | null
+          tags?: string[]
+          telefono?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          asignado_a: string | null
+          channel_id: string | null
+          contact_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["conv_estado"]
+          id: string
+          last_message_at: string | null
+          tenant_id: string
+          unread: number
+          updated_at: string
+        }
+        Insert: {
+          asignado_a?: string | null
+          channel_id?: string | null
+          contact_id: string
+          created_at?: string
+          estado?: Database["public"]["Enums"]["conv_estado"]
+          id?: string
+          last_message_at?: string | null
+          tenant_id: string
+          unread?: number
+          updated_at?: string
+        }
+        Update: {
+          asignado_a?: string | null
+          channel_id?: string | null
+          contact_id?: string
+          created_at?: string
+          estado?: Database["public"]["Enums"]["conv_estado"]
+          id?: string
+          last_message_at?: string | null
+          tenant_id?: string
+          unread?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deliveries: {
+        Row: {
+          cantidad: number
+          created_at: string
+          created_by: string | null
+          detalle: string | null
+          fecha: string
+          id: string
+          patient_id: string
+          plan_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          cantidad?: number
+          created_at?: string
+          created_by?: string | null
+          detalle?: string | null
+          fecha?: string
+          id?: string
+          patient_id: string
+          plan_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          cantidad?: number
+          created_at?: string
+          created_by?: string | null
+          detalle?: string | null
+          fecha?: string
+          id?: string
+          patient_id?: string
+          plan_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       document_extractions: {
@@ -1331,6 +1085,90 @@ export type Database = {
             columns: ["document_id"]
             isOneToOne: false
             referencedRelation: "patient_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_extractions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follow_ups: {
+        Row: {
+          canal: string | null
+          created_at: string
+          done_at: string | null
+          due_date: string
+          episode_id: string | null
+          estado: Database["public"]["Enums"]["followup_estado"]
+          id: string
+          patient_id: string
+          plan_id: string | null
+          resultado: string | null
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["followup_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          canal?: string | null
+          created_at?: string
+          done_at?: string | null
+          due_date: string
+          episode_id?: string | null
+          estado?: Database["public"]["Enums"]["followup_estado"]
+          id?: string
+          patient_id: string
+          plan_id?: string | null
+          resultado?: string | null
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["followup_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          canal?: string | null
+          created_at?: string
+          done_at?: string | null
+          due_date?: string
+          episode_id?: string | null
+          estado?: Database["public"]["Enums"]["followup_estado"]
+          id?: string
+          patient_id?: string
+          plan_id?: string | null
+          resultado?: string | null
+          tenant_id?: string
+          tipo?: Database["public"]["Enums"]["followup_tipo"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_ups_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_episodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -1406,6 +1244,234 @@ export type Database = {
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "intake_forms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_items: {
+        Row: {
+          created_at: string
+          id: string
+          minimo: number
+          nombre: string
+          product_id: string | null
+          stock: number
+          tenant_id: string
+          unidad: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          minimo?: number
+          nombre: string
+          product_id?: string | null
+          stock?: number
+          tenant_id: string
+          unidad?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          minimo?: number
+          nombre?: string
+          product_id?: string | null
+          stock?: number
+          tenant_id?: string
+          unidad?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maxsex_product_images: {
+        Row: {
+          alt: string | null
+          created_at: string
+          id: string
+          orden: number
+          product_id: string
+          tenant_id: string
+          url: string
+        }
+        Insert: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          orden?: number
+          product_id: string
+          tenant_id: string
+          url: string
+        }
+        Update: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          orden?: number
+          product_id?: string
+          tenant_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maxsex_product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "maxsex_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maxsex_product_images_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maxsex_products: {
+        Row: {
+          activo: boolean
+          advertencias: string | null
+          audiencia: Database["public"]["Enums"]["maxsex_audiencia"]
+          beneficios: string[]
+          color_hex: string
+          color_oklch: string
+          composicion: string | null
+          created_at: string
+          created_by: string | null
+          descripcion_corta: string
+          descripcion_larga: string | null
+          destacado: boolean
+          external_id: string | null
+          id: string
+          imagen_principal_url: string | null
+          indicacion_descripcion: string | null
+          indicacion_titulo: string | null
+          linea: Database["public"]["Enums"]["maxsex_linea"]
+          modo_uso: string | null
+          moneda: string
+          nombre_completo: string | null
+          nombre_corto: string
+          orden: number
+          precio: number
+          precio_promo: number | null
+          presentacion: string
+          rnpa: string | null
+          sku: string | null
+          slug: string
+          stock_actual: number
+          stock_minimo: number
+          synced_at: string | null
+          tagline: string
+          tenant_id: string
+          unidades_por_envase: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          advertencias?: string | null
+          audiencia?: Database["public"]["Enums"]["maxsex_audiencia"]
+          beneficios?: string[]
+          color_hex: string
+          color_oklch: string
+          composicion?: string | null
+          created_at?: string
+          created_by?: string | null
+          descripcion_corta: string
+          descripcion_larga?: string | null
+          destacado?: boolean
+          external_id?: string | null
+          id?: string
+          imagen_principal_url?: string | null
+          indicacion_descripcion?: string | null
+          indicacion_titulo?: string | null
+          linea: Database["public"]["Enums"]["maxsex_linea"]
+          modo_uso?: string | null
+          moneda?: string
+          nombre_completo?: string | null
+          nombre_corto: string
+          orden?: number
+          precio?: number
+          precio_promo?: number | null
+          presentacion?: string
+          rnpa?: string | null
+          sku?: string | null
+          slug: string
+          stock_actual?: number
+          stock_minimo?: number
+          synced_at?: string | null
+          tagline?: string
+          tenant_id: string
+          unidades_por_envase?: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          advertencias?: string | null
+          audiencia?: Database["public"]["Enums"]["maxsex_audiencia"]
+          beneficios?: string[]
+          color_hex?: string
+          color_oklch?: string
+          composicion?: string | null
+          created_at?: string
+          created_by?: string | null
+          descripcion_corta?: string
+          descripcion_larga?: string | null
+          destacado?: boolean
+          external_id?: string | null
+          id?: string
+          imagen_principal_url?: string | null
+          indicacion_descripcion?: string | null
+          indicacion_titulo?: string | null
+          linea?: Database["public"]["Enums"]["maxsex_linea"]
+          modo_uso?: string | null
+          moneda?: string
+          nombre_completo?: string | null
+          nombre_corto?: string
+          orden?: number
+          precio?: number
+          precio_promo?: number | null
+          presentacion?: string
+          rnpa?: string | null
+          sku?: string | null
+          slug?: string
+          stock_actual?: number
+          stock_minimo?: number
+          synced_at?: string | null
+          tagline?: string
+          tenant_id?: string
+          unidades_por_envase?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maxsex_products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       memberships: {
@@ -1442,6 +1508,120 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "memberships_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_templates: {
+        Row: {
+          activo: boolean
+          categoria: string
+          created_at: string
+          created_by: string | null
+          cuerpo: string
+          id: string
+          nombre: string
+          tenant_id: string
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          activo?: boolean
+          categoria?: string
+          created_at?: string
+          created_by?: string | null
+          cuerpo: string
+          id?: string
+          nombre: string
+          tenant_id: string
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          activo?: boolean
+          categoria?: string
+          created_at?: string
+          created_by?: string | null
+          cuerpo?: string
+          id?: string
+          nombre?: string
+          tenant_id?: string
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          contact_id: string
+          contenido: string | null
+          conversation_id: string
+          created_at: string
+          direccion: Database["public"]["Enums"]["msg_dir"]
+          estado: Database["public"]["Enums"]["msg_estado"]
+          id: string
+          media_path: string | null
+          provider_msg_id: string | null
+          sent_by: string | null
+          tenant_id: string
+          tipo: string
+        }
+        Insert: {
+          contact_id: string
+          contenido?: string | null
+          conversation_id: string
+          created_at?: string
+          direccion: Database["public"]["Enums"]["msg_dir"]
+          estado?: Database["public"]["Enums"]["msg_estado"]
+          id?: string
+          media_path?: string | null
+          provider_msg_id?: string | null
+          sent_by?: string | null
+          tenant_id: string
+          tipo?: string
+        }
+        Update: {
+          contact_id?: string
+          contenido?: string | null
+          conversation_id?: string
+          created_at?: string
+          direccion?: Database["public"]["Enums"]["msg_dir"]
+          estado?: Database["public"]["Enums"]["msg_estado"]
+          id?: string
+          media_path?: string | null
+          provider_msg_id?: string | null
+          sent_by?: string | null
+          tenant_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1513,6 +1693,13 @@ export type Database = {
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "patient_documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       patients: {
@@ -1576,6 +1763,77 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "patients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          comprobante_doc_id: string | null
+          created_at: string
+          created_by: string | null
+          fecha: string
+          id: string
+          importe: number
+          medio: string | null
+          notas: string | null
+          patient_id: string
+          plan_id: string
+          tenant_id: string
+        }
+        Insert: {
+          comprobante_doc_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fecha?: string
+          id?: string
+          importe: number
+          medio?: string | null
+          notas?: string | null
+          patient_id: string
+          plan_id: string
+          tenant_id: string
+        }
+        Update: {
+          comprobante_doc_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fecha?: string
+          id?: string
+          importe?: number
+          medio?: string | null
+          notas?: string | null
+          patient_id?: string
+          plan_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_comprobante_doc_id_fkey"
+            columns: ["comprobante_doc_id"]
+            isOneToOne: false
+            referencedRelation: "patient_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1654,6 +1912,57 @@ export type Database = {
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "prescriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          activo: boolean
+          aplicaciones: number
+          codigo: string
+          created_at: string
+          id: string
+          nombre: string
+          precio: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          aplicaciones?: number
+          codigo: string
+          created_at?: string
+          id?: string
+          nombre: string
+          precio?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          aplicaciones?: number
+          codigo?: string
+          created_at?: string
+          id?: string
+          nombre?: string
+          precio?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       psych_tests: {
@@ -1721,6 +2030,54 @@ export type Database = {
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "psych_tests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      segments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          definicion: Json
+          descripcion: string | null
+          id: string
+          nombre: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          definicion?: Json
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          definicion?: Json
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "segments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       signatures: {
@@ -1783,6 +2140,71 @@ export type Database = {
             referencedRelation: "patient_documents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "signatures_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          cantidad: number
+          created_at: string
+          created_by: string | null
+          id: string
+          item_id: string
+          motivo: string | null
+          ref_delivery_id: string | null
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["stock_mov"]
+        }
+        Insert: {
+          cantidad: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id: string
+          motivo?: string | null
+          ref_delivery_id?: string | null
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["stock_mov"]
+        }
+        Update: {
+          cantidad?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id?: string
+          motivo?: string | null
+          ref_delivery_id?: string | null
+          tenant_id?: string
+          tipo?: Database["public"]["Enums"]["stock_mov"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_ref_delivery_id_fkey"
+            columns: ["ref_delivery_id"]
+            isOneToOne: false
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tenants: {
@@ -1827,26 +2249,94 @@ export type Database = {
         }
         Relationships: []
       }
+      treatment_plans: {
+        Row: {
+          cant_aplicaciones: number
+          costo_total: number
+          created_at: string
+          created_by: string | null
+          descripcion: string | null
+          episode_id: string | null
+          estado: Database["public"]["Enums"]["plan_estado"]
+          fin: string | null
+          id: string
+          inicio: string | null
+          notas: string | null
+          patient_id: string
+          product_id: string | null
+          profesional_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          cant_aplicaciones?: number
+          costo_total?: number
+          created_at?: string
+          created_by?: string | null
+          descripcion?: string | null
+          episode_id?: string | null
+          estado?: Database["public"]["Enums"]["plan_estado"]
+          fin?: string | null
+          id?: string
+          inicio?: string | null
+          notas?: string | null
+          patient_id: string
+          product_id?: string | null
+          profesional_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          cant_aplicaciones?: number
+          costo_total?: number
+          created_at?: string
+          created_by?: string | null
+          descripcion?: string | null
+          episode_id?: string | null
+          estado?: Database["public"]["Enums"]["plan_estado"]
+          fin?: string | null
+          id?: string
+          inicio?: string | null
+          notas?: string | null
+          patient_id?: string
+          product_id?: string | null
+          profesional_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_plans_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_episodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_plans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_plans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_plans_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      v_patient_funnel: {
-        Row: {
-          tenant_id: string | null
-          status: Database["public"]["Enums"]["patient_status"] | null
-          total: number | null
-        }
-        Relationships: []
-      }
-      v_revenue_by_product: {
-        Row: {
-          tenant_id: string | null
-          producto: string | null
-          planes: number | null
-          cobrado: number | null
-          facturado: number | null
-        }
-        Relationships: []
-      }
       v_followups_pendientes: {
         Row: {
           tenant_id: string | null
@@ -1854,11 +2344,73 @@ export type Database = {
           total: number | null
           vencidos: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "follow_ups_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_maxsex_overview: {
+        Row: {
+          lineas_activas: number | null
+          productos_activos: number | null
+          productos_bajo_stock: number | null
+          productos_totales: number | null
+          stock_total: number | null
+          tenant_id: string | null
+          valor_inventario: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maxsex_products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_patient_funnel: {
+        Row: {
+          status: Database["public"]["Enums"]["patient_status"] | null
+          tenant_id: string | null
+          total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_revenue_by_product: {
+        Row: {
+          cobrado: number | null
+          facturado: number | null
+          planes: number | null
+          producto: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_plans_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
-      [_ in never]: never
+      run_followup_automations: { Args: never; Returns: number }
     }
     Enums: {
       appt_estado:
@@ -1885,6 +2437,11 @@ export type Database = {
         | "instagram"
         | "manual"
       clinical_status: "draft" | "signed" | "closed" | "amended"
+      condicion:
+        | "disfuncion_erectil"
+        | "eyaculacion_precoz"
+        | "deficit_testosterona"
+        | "peyronie"
       contact_etapa:
         | "lead"
         | "contactado"
@@ -1903,18 +2460,6 @@ export type Database = {
         | "walk_in"
         | "otro"
       conv_estado: "abierta" | "pendiente" | "cerrada"
-      msg_dir: "in" | "out"
-      msg_estado:
-        | "pendiente"
-        | "enviado"
-        | "entregado"
-        | "leido"
-        | "fallido"
-      condicion:
-        | "disfuncion_erectil"
-        | "eyaculacion_precoz"
-        | "deficit_testosterona"
-        | "peyronie"
       doc_status:
         | "uploaded"
         | "extracting"
@@ -1942,11 +2487,16 @@ export type Database = {
         | "alta"
         | "baja"
       followup_estado: "pendiente" | "hecho" | "omitido" | "reprogramado"
-      followup_tipo:
-        | "control_15"
-        | "control_30"
-        | "control_60"
-        | "adherencia"
+      followup_tipo: "control_15" | "control_30" | "control_60" | "adherencia"
+      maxsex_audiencia: "hombre" | "mujer" | "unisex"
+      maxsex_linea:
+        | "active"
+        | "active_fem"
+        | "action"
+        | "action_plus"
+        | "control"
+      msg_dir: "in" | "out"
+      msg_estado: "pendiente" | "enviado" | "entregado" | "leido" | "fallido"
       patient_status: "activo" | "en_tratamiento" | "alta" | "inactivo"
       plan_estado: "activo" | "completado" | "cancelado" | "en_mora"
       stock_mov: "entrada" | "salida" | "ajuste"
@@ -2104,6 +2654,12 @@ export const Constants = {
         "manual",
       ],
       clinical_status: ["draft", "signed", "closed", "amended"],
+      condicion: [
+        "disfuncion_erectil",
+        "eyaculacion_precoz",
+        "deficit_testosterona",
+        "peyronie",
+      ],
       contact_etapa: [
         "lead",
         "contactado",
@@ -2124,20 +2680,6 @@ export const Constants = {
         "otro",
       ],
       conv_estado: ["abierta", "pendiente", "cerrada"],
-      msg_dir: ["in", "out"],
-      msg_estado: [
-        "pendiente",
-        "enviado",
-        "entregado",
-        "leido",
-        "fallido",
-      ],
-      condicion: [
-        "disfuncion_erectil",
-        "eyaculacion_precoz",
-        "deficit_testosterona",
-        "peyronie",
-      ],
       doc_status: [
         "uploaded",
         "extracting",
@@ -2169,6 +2711,16 @@ export const Constants = {
       ],
       followup_estado: ["pendiente", "hecho", "omitido", "reprogramado"],
       followup_tipo: ["control_15", "control_30", "control_60", "adherencia"],
+      maxsex_audiencia: ["hombre", "mujer", "unisex"],
+      maxsex_linea: [
+        "active",
+        "active_fem",
+        "action",
+        "action_plus",
+        "control",
+      ],
+      msg_dir: ["in", "out"],
+      msg_estado: ["pendiente", "enviado", "entregado", "leido", "fallido"],
       patient_status: ["activo", "en_tratamiento", "alta", "inactivo"],
       plan_estado: ["activo", "completado", "cancelado", "en_mora"],
       stock_mov: ["entrada", "salida", "ajuste"],

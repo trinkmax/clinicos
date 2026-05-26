@@ -3,13 +3,16 @@
  * crea o VINCULA el usuario dueño (merge de app_metadata { tenant_id,
  * role:'owner', app:'clinicos' }) y su membership.
  *
- *   pnpm tsx scripts/bootstrap.ts "<Nombre clínica>" <slug> <email> [--reset-password]
+ *   pnpm tsx scripts/bootstrap.ts "<Nombre clínica>" <slug> <email> [--reset-password] [--password=<valor>]
  *
  * Requiere SUPABASE_SECRET_KEY. NO toca user_metadata (el trigger legado
  * `workos` se guarda por user_metadata.app === 'workos'). auth.users es
  * COMPARTIDA: si el email ya existe (p.ej. dueño de workos), se vincula
- * sin pisar su app_metadata previa ni su contraseña (salvo --reset-password,
- * que afecta también el login de workos por ser el mismo usuario).
+ * sin pisar su app_metadata previa ni su contraseña (salvo --reset-password
+ * o --password=, que afectan también el login de workos por ser el mismo usuario).
+ *
+ * --password=<valor> setea una contraseña explícita (en lugar de random). Implica
+ * reset si el usuario ya existe. Útil para bootstrap inicial / accesos compartidos.
  */
 import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
@@ -22,12 +25,22 @@ try {
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const resetPassword = process.argv.includes("--reset-password");
+const explicitPasswordFlag = process.argv.find((a) =>
+  a.startsWith("--password="),
+);
+const explicitPassword = explicitPasswordFlag
+  ? explicitPasswordFlag.slice("--password=".length)
+  : undefined;
 const [name, slug, email] = args;
 
 if (!name || !slug || !email) {
   console.error(
-    'Uso: pnpm tsx scripts/bootstrap.ts "<Nombre>" <slug> <email> [--reset-password]',
+    'Uso: pnpm tsx scripts/bootstrap.ts "<Nombre>" <slug> <email> [--reset-password] [--password=<valor>]',
   );
+  process.exit(1);
+}
+if (explicitPassword !== undefined && explicitPassword.length < 8) {
+  console.error("--password= debe tener al menos 8 caracteres.");
   process.exit(1);
 }
 if (!/^[a-z0-9-]+$/.test(slug)) {
@@ -99,20 +112,25 @@ async function main() {
       role: "owner",
       app: "clinicos",
     };
-    const newPassword = resetPassword
-      ? randomBytes(12).toString("base64url")
-      : undefined;
+    const newPassword =
+      explicitPassword ??
+      (resetPassword ? randomBytes(12).toString("base64url") : undefined);
     const { error } = await admin.auth.admin.updateUserById(userId, {
       app_metadata: mergedAppMeta,
       ...(newPassword ? { password: newPassword } : {}),
     });
     if (error) throw new Error(`Vincular usuario: ${error.message}`);
     console.log("• Usuario existente vinculado a clinicOS (app_metadata).");
-    passwordMsg = newPassword
-      ? `Password (NUEVA, también cambia el login de workos): ${newPassword}`
-      : "Password: usá la que ya tenías (mismo usuario que workos). Si no la sabés, re-corré con --reset-password o reseteala en el Dashboard → Auth.";
+    if (explicitPassword) {
+      passwordMsg = `Password establecida (la pasada por --password, también cambia el login de workos): ${explicitPassword}`;
+    } else if (newPassword) {
+      passwordMsg = `Password (NUEVA, también cambia el login de workos): ${newPassword}`;
+    } else {
+      passwordMsg =
+        "Password: usá la que ya tenías (mismo usuario que workos). Si no la sabés, re-corré con --reset-password o --password=<valor>, o reseteala en el Dashboard → Auth.";
+    }
   } else {
-    const password = randomBytes(12).toString("base64url");
+    const password = explicitPassword ?? randomBytes(12).toString("base64url");
     const { data: created, error } = await admin.auth.admin.createUser({
       email,
       password,
@@ -122,7 +140,9 @@ async function main() {
     if (error || !created.user) throw new Error(`Usuario: ${error?.message}`);
     userId = created.user.id;
     console.log("• Usuario dueño creado.");
-    passwordMsg = `Password temporal: ${password}  ← cambiala al primer ingreso`;
+    passwordMsg = explicitPassword
+      ? `Password establecida: ${password}`
+      : `Password temporal: ${password}  ← cambiala al primer ingreso`;
   }
 
   // 3) Membership (upsert idempotente)

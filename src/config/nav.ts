@@ -4,6 +4,7 @@ import {
   CalendarClock,
   Users,
   Wallet,
+  Pill,
   MessagesSquare,
   Megaphone,
   Workflow,
@@ -47,6 +48,15 @@ const CLIN: Role[] = [
   ROLES.comercial,
 ];
 const COM: Role[] = [ROLES.owner, ROLES.admin, ROLES.comercial];
+const MAXSEX: Role[] = [
+  ROLES.owner,
+  ROLES.admin,
+  ROLES.recepcion,
+  ROLES.profesional,
+  ROLES.asesor,
+  ROLES.comercial,
+  ROLES.marketing,
+];
 const CRM: Role[] = [
   ROLES.owner,
   ROLES.admin,
@@ -92,6 +102,14 @@ export const NAV: NavGroup[] = [
         roles: COM,
         phase: 3,
         description: "Productos, planes, pagos, saldos y entregas",
+      },
+      {
+        title: "Maxsex",
+        href: "/maxsex",
+        icon: Pill,
+        roles: MAXSEX,
+        phase: 3,
+        description: "Catálogo OTC de suplementos. Source-of-truth del e-commerce",
       },
     ],
   },
