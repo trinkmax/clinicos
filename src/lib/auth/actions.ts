@@ -15,7 +15,7 @@ export interface SignInState {
   error?: string;
 }
 
-/** Inicio de sesión con email + contraseña (acceso solo por invitación). */
+/** Inicio de sesión con email + contraseña (provisión interna por admin). */
 export async function signIn(
   _prev: SignInState,
   formData: FormData,

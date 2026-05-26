@@ -31,7 +31,7 @@ async function findUserByEmail(admin: AdminClient, email: string) {
 
 export async function inviteMember(
   input: unknown,
-): Promise<ActionResult<{ tempPassword?: string }>> {
+): Promise<ActionResult<{ tempPassword?: string; generated: boolean }>> {
   return action(
     {
       roles: ADMIN,
@@ -39,6 +39,12 @@ export async function inviteMember(
         email: z.string().trim().toLowerCase().email("Email inválido"),
         role: roleEnum,
         full_name: z.string().trim().max(120).optional(),
+        password: z
+          .string()
+          .min(8, "Mínimo 8 caracteres")
+          .max(72, "Máximo 72 caracteres")
+          .optional()
+          .or(z.literal("").transform(() => undefined)),
       }),
       input,
     },
@@ -47,6 +53,7 @@ export async function inviteMember(
       const existing = await findUserByEmail(admin, data.email);
       let userId: string;
       let tempPassword: string | undefined;
+      let generated = false;
 
       if (existing) {
         userId = existing.id;
@@ -57,9 +64,16 @@ export async function inviteMember(
             role: data.role,
             app: "clinicos",
           },
+          ...(data.password ? { password: data.password } : {}),
         });
+        if (data.password) tempPassword = data.password;
       } else {
-        tempPassword = randomBytes(9).toString("base64url");
+        if (data.password) {
+          tempPassword = data.password;
+        } else {
+          tempPassword = randomBytes(9).toString("base64url");
+          generated = true;
+        }
         const { data: created, error } =
           await admin.auth.admin.createUser({
             email: data.email,
@@ -104,7 +118,7 @@ export async function inviteMember(
         if (error) throw new Error(error.message);
       }
       revalidatePath("/ajustes");
-      return { tempPassword };
+      return { tempPassword, generated };
     },
   );
 }

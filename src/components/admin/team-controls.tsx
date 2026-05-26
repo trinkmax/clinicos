@@ -2,7 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, UserPlus, Power, Save } from "lucide-react";
+import {
+  Loader2,
+  UserPlus,
+  Power,
+  Save,
+  Eye,
+  EyeOff,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -33,38 +41,75 @@ import {
 const selectCls =
   "border-input bg-background focus-visible:ring-ring h-10 w-full rounded-lg border px-3 text-sm outline-none focus-visible:ring-2";
 
+/** Password aleatoria URL-safe (~12 chars). Coincide con la lógica server-side. */
+function generatePassword(): string {
+  const bytes = new Uint8Array(9);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
 export function InviteMemberDialog() {
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
+  const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const router = useRouter();
+
+  function resetForm() {
+    setPassword("");
+    setShowPwd(false);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) resetForm();
+      }}
+    >
       <DialogTrigger
         render={
           <Button size="sm">
             <UserPlus className="size-3.5" />
-            Invitar usuario
+            Nuevo usuario
           </Button>
         }
       />
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Invitar / vincular usuario</DialogTitle>
+          <DialogTitle>Crear usuario</DialogTitle>
         </DialogHeader>
         <form
           action={(fd) =>
             start(async () => {
               const r = await inviteMember(Object.fromEntries(fd));
-              if (r.ok) {
+              if (!r.ok) {
+                toast.error(r.error);
+                return;
+              }
+              const tmp = r.data.tempPassword;
+              if (tmp && r.data.generated) {
                 toast.success(
-                  r.data.tempPassword
-                    ? `Usuario creado. Contraseña temporal: ${r.data.tempPassword}`
-                    : "Usuario existente vinculado a la clínica",
-                  { duration: 12000 },
+                  `Usuario creado. Contraseña generada: ${tmp}`,
+                  {
+                    duration: Infinity,
+                    action: {
+                      label: "Copiar",
+                      onClick: () => navigator.clipboard.writeText(tmp),
+                    },
+                  },
                 );
-                setOpen(false);
-                router.refresh();
-              } else toast.error(r.error);
+              } else if (tmp) {
+                toast.success("Usuario creado con la contraseña indicada.");
+              } else {
+                toast.success("Usuario existente vinculado a la clínica.");
+              }
+              setOpen(false);
+              router.refresh();
             })
           }
           className="space-y-4"
@@ -79,7 +124,12 @@ export function InviteMemberDialog() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="role">Rol</Label>
-            <select id="role" name="role" className={selectCls} defaultValue="recepcion">
+            <select
+              id="role"
+              name="role"
+              className={selectCls}
+              defaultValue="recepcion"
+            >
               {ALL_ROLES.map((r) => (
                 <option key={r} value={r}>
                   {ROLE_LABELS[r]}
@@ -87,10 +137,57 @@ export function InviteMemberDialog() {
               ))}
             </select>
           </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <button
+                type="button"
+                onClick={() => {
+                  setPassword(generatePassword());
+                  setShowPwd(true);
+                }}
+                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-[11px] font-medium transition-colors"
+              >
+                <Sparkles className="size-3" />
+                Generar
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPwd ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={8}
+                maxLength={72}
+                autoComplete="new-password"
+                placeholder="Mínimo 8 caracteres"
+                className="pr-10 font-mono tracking-tight"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd((v) => !v)}
+                aria-label={
+                  showPwd ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+                className="text-muted-foreground hover:text-foreground absolute right-2 top-1/2 -translate-y-1/2 p-1 transition-colors"
+              >
+                {showPwd ? (
+                  <EyeOff className="size-3.5" />
+                ) : (
+                  <Eye className="size-3.5" />
+                )}
+              </button>
+            </div>
+            <p className="text-muted-foreground text-[11px] leading-relaxed">
+              Dejá vacío para que el sistema genere una contraseña aleatoria.
+            </p>
+          </div>
           <DialogFooter>
             <Button type="submit" disabled={pending} className="w-full">
               {pending && <Loader2 className="size-4 animate-spin" />}
-              Invitar
+              Crear usuario
             </Button>
           </DialogFooter>
         </form>
