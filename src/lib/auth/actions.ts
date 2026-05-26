@@ -43,9 +43,14 @@ export async function signIn(
   redirect(parsed.data.next ?? "/");
 }
 
-/** Cierre de sesión. */
+/** Cierre de sesión. Tolerante: si la sesión local ya es inválida igual redirige. */
 export async function signOut(): Promise<void> {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // Si Supabase no puede revocar (cuenta borrada / sesión expirada),
+    // el redirect limpia igual: el proxy permite /login sin sesión.
+  }
   redirect("/login");
 }
