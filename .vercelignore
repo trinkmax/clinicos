@@ -3,22 +3,23 @@
 # por si se hace `vercel deploy` desde local con la CLI.
 
 # ⚠️ PHI/PII real — JAMÁS subir a Vercel
-Info/
+/Info/
 
 # Worker WhatsApp: se deploya aparte (Railway/Fly), no en Vercel
-worker/
+/worker/
 
-# No se necesitan en el runtime de la app
-supabase/
-scripts/
-e2e/
-playwright.config.ts
+# No se necesitan en el runtime de la app.
+# Anclados a la raíz con "/" para no matchear src/lib/supabase, etc.
+/supabase/
+/scripts/
+/e2e/
+/playwright.config.ts
 
 # Docs / tooling de agentes
-.agents/
-.claude/
-.mcp.json
-skills-lock.json
-AGENTS.md
-CLAUDE.md
-README.md
+/.agents/
+/.claude/
+/.mcp.json
+/skills-lock.json
+/AGENTS.md
+/CLAUDE.md
+/README.md
