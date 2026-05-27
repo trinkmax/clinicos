@@ -60,7 +60,9 @@ function CommandDialog({
         )}
         showCloseButton={showCloseButton}
       >
-        {children}
+        {/* cmdk requiere Command como root del Provider — sin él, CommandInput
+            crashea con "Cannot read properties of undefined (reading 'subscribe')". */}
+        <Command>{children}</Command>
       </DialogContent>
     </Dialog>
   )

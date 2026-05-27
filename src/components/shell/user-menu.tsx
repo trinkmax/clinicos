@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import { LifeBuoy, LogOut, Settings, UserRound } from "lucide-react";
 
 import { signOut } from "@/lib/auth/actions";
@@ -24,15 +25,16 @@ function initials(value: string) {
  * Versión topbar del menú de usuario. Avatar como trigger, dropdown completo
  * con Mi perfil / Ajustes / Ayuda / Cerrar sesión.
  *
- * NOTA UX-crítica: el `<form action={signOut}>` vive FUERA del
- * `DropdownMenuContent` (que es un Portal al document.body). De estar adentro,
- * un browser con JS no hidratado podía interpretar el click sobre el trigger
- * como submit implícito del form, navegando a /login en una página que
- * todavía no terminó de cargar y mostrando "This page couldn't load".
- * El item de logout linkea al form vía `form="topbar-signout"` + `type="submit"`.
+ * Detalles non-obvious:
+ * - El header del menú es un <div> estilizado, NO `DropdownMenuLabel` —
+ *   `Menu.GroupLabel` exige un `Menu.Group` ancestro y sin él lanza
+ *   "MenuGroupContext is missing", lo que crashea TODA página dentro de
+ *   `(app)/*` (el topbar se monta en todas).
+ * - El logout usa un form oculto + `requestSubmit()` desde un onClick para
+ *   evitar mezclar el `DropdownMenuItem` con `render=<button>` (que Base UI
+ *   marca como inconsistente: `nativeButton` aplica al item entero y Link
+ *   en otros items lo dejan en false, peleándose con el button submit).
  */
-const SIGNOUT_FORM_ID = "topbar-signout";
-
 export function TopbarUserMenu({
   email,
   fullName,
@@ -42,13 +44,18 @@ export function TopbarUserMenu({
   fullName: string | null;
   role: Role | null;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const display = fullName?.trim() || email || "Usuario";
   const ini = initials(email ?? fullName ?? "US");
+
+  function triggerSignOut() {
+    formRef.current?.requestSubmit();
+  }
 
   return (
     <>
       {/* Form aislado para el logout — fuera del portal del menú. */}
-      <form id={SIGNOUT_FORM_ID} action={signOut} className="hidden" />
+      <form ref={formRef} action={signOut} className="hidden" />
 
       <DropdownMenu>
         <DropdownMenuTrigger
@@ -65,9 +72,7 @@ export function TopbarUserMenu({
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="bottom" className="w-60">
-          {/* Header del menú — un div estilizado, NO DropdownMenuLabel.
-             Base UI requiere que GroupLabel viva dentro de un Group; usar
-             el primitive sin Group crashea con MenuGroupContext missing. */}
+          {/* Header del menú — div estilizado, no Menu.GroupLabel (ver arriba). */}
           <div className="flex items-center gap-2.5 px-2 py-2">
             <Avatar className="size-9 shrink-0 rounded-lg">
               <AvatarFallback className="bg-primary/12 text-primary rounded-lg text-xs font-semibold">
@@ -82,11 +87,17 @@ export function TopbarUserMenu({
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem nativeButton={false} render={<Link href="/perfil" />}>
+          <DropdownMenuItem
+            nativeButton={false}
+            render={<Link href="/perfil" />}
+          >
             <UserRound className="size-4" />
             Mi perfil
           </DropdownMenuItem>
-          <DropdownMenuItem nativeButton={false} render={<Link href="/ajustes" />}>
+          <DropdownMenuItem
+            nativeButton={false}
+            render={<Link href="/ajustes" />}
+          >
             <Settings className="size-4" />
             Ajustes
           </DropdownMenuItem>
@@ -97,13 +108,9 @@ export function TopbarUserMenu({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
-            render={
-              <button
-                type="submit"
-                form={SIGNOUT_FORM_ID}
-                className="w-full cursor-pointer"
-              />
-            }
+            onClick={triggerSignOut}
+            onSelect={triggerSignOut}
+            className="cursor-pointer"
           >
             <LogOut className="size-4" />
             Cerrar sesión

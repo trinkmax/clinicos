@@ -11,7 +11,6 @@ import { Breadcrumbs, type Crumb } from "@/components/ui/breadcrumbs";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { NotificationBell } from "@/components/shell/notification-bell";
-import { PageAction } from "@/components/shell/page-action";
 import { TopbarUserMenu } from "@/components/shell/user-menu";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -119,7 +118,6 @@ export function AppTopbar({
       </div>
 
       <div className="flex items-center gap-1.5">
-        <PageAction role={role} />
         <button
           type="button"
           onClick={openCommandMenu}
