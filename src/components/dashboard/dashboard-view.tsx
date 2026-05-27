@@ -7,26 +7,24 @@ import {
   ArrowUpRight,
   BarChart3,
   Bell,
+  Boxes,
   CalendarClock,
   CalendarDays,
-  CloudSun,
-  Heart,
+  Check,
+  CircleAlert,
   HeartPulse,
-  Lightbulb,
   ListChecks,
   MapPin,
+  Megaphone,
   MessagesSquare,
-  Moon,
   ReceiptText,
-  Sparkles,
-  Sun,
-  Sunrise,
   UserPlus,
   Users,
   Video,
   Wallet,
   Wifi,
   WifiOff,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 
@@ -41,7 +39,6 @@ import {
   ESTADO_STYLE,
 } from "@/lib/ui/appointments";
 import { TIPO_LABEL, ESTADO_LABEL } from "@/lib/validation/appointments";
-import { todaysTip, dayBriefing } from "@/lib/ui/daily-tip";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/ui/stat-card";
@@ -56,13 +53,6 @@ const FUNNEL_COLOR: Record<string, string> = {
   inactivo: "var(--muted-foreground)",
 };
 
-const VIBE_ICON: Record<string, LucideIcon> = {
-  morning: Sunrise,
-  noon: Sun,
-  evening: CloudSun,
-  night: Moon,
-};
-
 interface QuickAction {
   label: string;
   description: string;
@@ -75,28 +65,28 @@ const QUICK_ACTIONS_BY_ROLE: Record<string, QuickAction[]> = {
   default: [
     {
       label: "Nuevo paciente",
-      description: "Alta + ficha de ingreso",
+      description: "Alta",
       href: "/pacientes",
       icon: UserPlus,
       accent: "var(--primary)",
     },
     {
       label: "Nuevo turno",
-      description: "Agendar consulta",
+      description: "Agenda",
       href: "/turnero",
       icon: CalendarClock,
       accent: "var(--chart-2)",
     },
     {
-      label: "Registrar pago",
-      description: "Cobranza sobre plan",
+      label: "Cobranzas",
+      description: "Pagos",
       href: "/comercial",
       icon: ReceiptText,
       accent: "var(--success)",
     },
     {
-      label: "Ir al inbox",
-      description: "Conversaciones abiertas",
+      label: "Inbox",
+      description: "Mensajes",
       href: "/inbox",
       icon: MessagesSquare,
       accent: "var(--chart-3)",
@@ -105,28 +95,28 @@ const QUICK_ACTIONS_BY_ROLE: Record<string, QuickAction[]> = {
   marketing: [
     {
       label: "Inbox",
-      description: "Conversaciones abiertas",
+      description: "Mensajes",
       href: "/inbox",
       icon: MessagesSquare,
       accent: "var(--chart-3)",
     },
     {
       label: "Campañas",
-      description: "Atribución y envíos",
+      description: "Marketing",
       href: "/marketing",
-      icon: Heart,
+      icon: Megaphone,
       accent: "var(--primary)",
     },
     {
       label: "Automatizaciones",
-      description: "Controles 15/30/60",
+      description: "Workflow",
       href: "/automatizaciones",
-      icon: ListChecks,
+      icon: Workflow,
       accent: "var(--chart-2)",
     },
     {
       label: "Reportes",
-      description: "Indicadores del período",
+      description: "Indicadores",
       href: "/reportes",
       icon: BarChart3,
       accent: "var(--success)",
@@ -137,6 +127,15 @@ const QUICK_ACTIONS_BY_ROLE: Record<string, QuickAction[]> = {
 function quickActionsFor(role: Role): QuickAction[] {
   if (role === "marketing") return QUICK_ACTIONS_BY_ROLE.marketing!;
   return QUICK_ACTIONS_BY_ROLE.default!;
+}
+
+interface PendingItem {
+  label: string;
+  count: number;
+  href: string;
+  icon: LucideIcon;
+  tone: "alert" | "warn" | "info";
+  detail: string;
 }
 
 export function DashboardView({
@@ -183,7 +182,7 @@ export function DashboardView({
     { weekday: "long", day: "numeric", month: "long" },
   );
 
-  // KPIs — siempre devuelven 5, rellenando los que no aplican con placeholders.
+  // KPIs — el filtro deja en orden los visibles para el rol.
   const kpis = useMemo(() => {
     const items = [
       data.patients && {
@@ -254,16 +253,69 @@ export function DashboardView({
   const revenue = (data.revenue ?? [])
     .filter((r) => r.cobrado > 0)
     .slice(0, 6);
-  const hasSidePanels = funnel.length > 0 || !!data.followups?.length;
+  const hasSidePanels = funnel.length > 0;
 
-  const tip = useMemo(() => todaysTip(), []);
-  const briefing = useMemo(() => dayBriefing(), []);
-  const BriefIcon = VIBE_ICON[briefing.vibe] ?? Sun;
   const actions = quickActionsFor(role);
 
-  // Sistema: lo más urgente
+  // Estado real de canales — sin texto motivacional/inventado.
   const waOk = channels.whatsapp === "connected" || channels.whatsapp === "active";
   const waPending = channels.whatsapp === "pending" || channels.whatsapp === "qr";
+  const waState = waOk ? "Conectado" : waPending ? "Pendiente" : "Desconectado";
+  const metaOk = channels.meta === "connected" || channels.meta === "active";
+  const metaState = metaOk
+    ? "Conectado"
+    : channels.meta === "none"
+      ? "Sin configurar"
+      : "Desconectado";
+
+  // Pendientes reales — solo se muestran cosas con dato.
+  const pendingItems: PendingItem[] = [];
+  if (data.ops && data.ops.seguimientosVencidos > 0) {
+    pendingItems.push({
+      label: "Seguimientos vencidos",
+      count: data.ops.seguimientosVencidos,
+      href: "/comercial?tab=seguimientos",
+      icon: CircleAlert,
+      tone: "alert",
+      detail: `${data.ops.seguimientosPendientes} pendientes totales`,
+    });
+  }
+  if (data.ops && data.ops.stockBajo > 0) {
+    pendingItems.push({
+      label: "Stock por debajo del mínimo",
+      count: data.ops.stockBajo,
+      href: "/comercial?tab=stock",
+      icon: Boxes,
+      tone: "warn",
+      detail: "Insumos a reponer",
+    });
+  }
+  if (data.crm && data.crm.convAbiertas > 0) {
+    pendingItems.push({
+      label: "Conversaciones abiertas",
+      count: data.crm.convAbiertas,
+      href: "/inbox",
+      icon: MessagesSquare,
+      tone: "info",
+      detail: `${data.crm.leads} de ellas son leads`,
+    });
+  }
+  if (data.commercial && data.commercial.saldo > 0) {
+    pendingItems.push({
+      label: "Saldo por cobrar",
+      count: data.commercial.saldo,
+      href: "/reportes",
+      icon: Wallet,
+      tone: "warn",
+      detail: "Ver deudores en Reportes",
+    });
+  }
+
+  const hasBriefingData =
+    !!data.appointments ||
+    channels.whatsapp !== "none" ||
+    channels.meta !== "none" ||
+    pendingItems.length > 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-7">
@@ -282,15 +334,15 @@ export function DashboardView({
             </p>
             <h1 className="text-[2.25rem] font-semibold tracking-tight text-balance leading-[1.05]">
               {greeting},{" "}
-              <span className="text-gradient-brand">{userName}</span>
+              <span className="text-primary">{userName}</span>
             </h1>
             <p className="text-muted-foreground text-[15px]">
               Centro de control · {roleLabel}
             </p>
           </div>
 
-          {/* Acciones rápidas — atajos a las pantallas operativas. */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:max-w-md">
+          {/* Acciones rápidas — atajos directos a las pantallas operativas. */}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-[26rem]">
             {actions.map((a) => (
               <Link
                 key={a.label}
@@ -308,14 +360,13 @@ export function DashboardView({
                   <a.icon className="size-4" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold tracking-tight">
+                  <p className="text-[13px] font-semibold tracking-tight leading-tight">
                     {a.label}
                   </p>
-                  <p className="text-muted-foreground truncate text-[10px]">
+                  <p className="text-muted-foreground text-[11px]">
                     {a.description}
                   </p>
                 </div>
-                <ArrowUpRight className="text-muted-foreground/40 absolute top-2.5 right-2.5 size-3.5 opacity-0 transition-all group-hover/qa:opacity-100" />
               </Link>
             ))}
           </div>
@@ -346,18 +397,15 @@ export function DashboardView({
         </div>
       )}
 
-      {/* ── Agenda + paneles ───────────────────────────────────────── */}
+      {/* ── Agenda + Embudo ─────────────────────────────────────────── */}
       <div
         className={cn(
           "grid gap-4",
-          hasSidePanels && "lg:grid-cols-3",
+          hasSidePanels && "lg:grid-cols-[2fr_1fr]",
         )}
       >
         {data.appointments && (
-          <Reveal
-            delay={0.05}
-            className={cn(hasSidePanels && "lg:col-span-2")}
-          >
+          <Reveal delay={0.05}>
             <Card className="h-full gap-0 p-0">
               <div className="flex items-center justify-between gap-3 px-5 py-4">
                 <div className="flex items-center gap-2.5">
@@ -476,51 +524,24 @@ export function DashboardView({
         )}
 
         {hasSidePanels && (
-          <Reveal delay={0.1} className="space-y-4">
-            {funnel.length > 0 && (
-              <Card className="p-5">
-                <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold tracking-tight">
-                  <BarChart3 className="text-muted-foreground size-4" />
-                  Embudo de pacientes
-                </h2>
-                <Donut
-                  segments={donutSegs}
-                  centerValue={String(funnelTotal)}
-                  centerLabel="total"
-                />
-              </Card>
-            )}
-
-            {data.followups && data.followups.length > 0 && (
-              <Card className="p-5">
-                <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight">
-                  <Bell className="text-muted-foreground size-4" />
-                  Seguimientos
-                </h2>
-                <ul className="space-y-2">
-                  {data.followups.slice(0, 4).map((f) => (
-                    <li
-                      key={f.tipo}
-                      className="flex items-center justify-between gap-3 text-sm"
-                    >
-                      <span className="text-muted-foreground capitalize">
-                        {f.tipo.replace(/_/g, " ")}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        {f.vencidos > 0 && (
-                          <span className="bg-destructive/10 text-destructive rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
-                            {f.vencidos} venc.
-                          </span>
-                        )}
-                        <span className="tabular-nums font-semibold">
-                          {f.total}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            )}
+          <Reveal delay={0.1}>
+            <Card className="flex h-full flex-col p-5">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight">
+                <BarChart3 className="text-muted-foreground size-4" />
+                Embudo de pacientes
+              </h2>
+              {funnel.length > 0 && (
+                <div className="flex flex-1 flex-col justify-center">
+                  <Donut
+                    segments={donutSegs}
+                    size={120}
+                    thickness={14}
+                    centerValue={String(funnelTotal)}
+                    centerLabel="total"
+                  />
+                </div>
+              )}
+            </Card>
           </Reveal>
         )}
       </div>
@@ -545,126 +566,203 @@ export function DashboardView({
         </Reveal>
       )}
 
-      {/* ── Briefing del día: clima / sistema / tip ────────────────── */}
-      <Reveal delay={0.06}>
-        <section className="space-y-3">
-          <h2 className="text-muted-foreground text-eyebrow inline-flex items-center gap-1.5">
-            <Sparkles className="size-3" />
-            Briefing del día
-          </h2>
-          <div className="grid gap-3 md:grid-cols-3">
-            {/* Momento del día */}
-            <Card className="hairline-top relative overflow-hidden p-5">
-              <span
-                aria-hidden
-                className="from-primary/12 absolute -top-12 -right-10 size-32 rounded-full bg-gradient-to-br to-transparent blur-2xl"
-              />
-              <div className="relative space-y-3">
-                <div className="flex items-center justify-between">
+      {/* ── Resumen del día (datos reales) ─────────────────────────── */}
+      {hasBriefingData && (
+        <Reveal delay={0.06}>
+          <section className="space-y-3">
+            <h2 className="text-muted-foreground text-eyebrow inline-flex items-center gap-1.5">
+              Resumen del día
+            </h2>
+            <div className="grid gap-3 md:grid-cols-3">
+              {/* Día — datos reales del turnero */}
+              <Card className="hairline-top p-5">
+                <header className="mb-3 flex items-center justify-between">
                   <span className="bg-primary/10 text-primary grid size-9 place-items-center rounded-xl">
-                    <BriefIcon className="size-5" />
+                    <CalendarClock className="size-5" />
                   </span>
                   <Badge variant="secondary" className="text-[10px]">
-                    Momento
+                    Operación
                   </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold tracking-tight">
-                    {briefing.title}
+                </header>
+                {data.appointments ? (
+                  <>
+                    <p className="text-2xl font-semibold tabular-nums leading-none">
+                      {data.appointments.stats.total}
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-[13px]">
+                      turnos programados hoy
+                    </p>
+                    <dl className="text-foreground mt-4 grid grid-cols-2 gap-2 text-[12px]">
+                      <div className="ring-foreground/8 bg-muted/30 rounded-lg px-2.5 py-2 ring-1">
+                        <dt className="text-muted-foreground text-[10px] uppercase tracking-wide">
+                          Atendidos
+                        </dt>
+                        <dd className="mt-0.5 text-sm font-semibold tabular-nums">
+                          {data.appointments.stats.atendidos}
+                        </dd>
+                      </div>
+                      <div className="ring-foreground/8 bg-muted/30 rounded-lg px-2.5 py-2 ring-1">
+                        <dt className="text-muted-foreground text-[10px] uppercase tracking-wide">
+                          Abonaron
+                        </dt>
+                        <dd className="mt-0.5 text-sm font-semibold tabular-nums">
+                          {data.appointments.stats.abonaron}
+                        </dd>
+                      </div>
+                    </dl>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground text-[13px]">
+                    No tenés acceso a la agenda con tu rol.
                   </p>
-                  <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
-                    {briefing.hint}
-                  </p>
-                </div>
-              </div>
-            </Card>
+                )}
+              </Card>
 
-            {/* Sistema */}
-            <Card className="hairline-top relative overflow-hidden p-5">
-              <span
-                aria-hidden
-                className="from-success/12 absolute -top-12 -right-10 size-32 rounded-full bg-gradient-to-br to-transparent blur-2xl"
-              />
-              <div className="relative space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="bg-success/12 text-success grid size-9 place-items-center rounded-xl">
+              {/* Conexiones — estado real */}
+              <Card className="hairline-top p-5">
+                <header className="mb-3 flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "grid size-9 place-items-center rounded-xl",
+                      waOk
+                        ? "bg-success/12 text-success"
+                        : waPending
+                          ? "bg-warning/12 text-warning-foreground"
+                          : "bg-destructive/10 text-destructive",
+                    )}
+                  >
                     <HeartPulse className="size-5" />
                   </span>
                   <Badge variant="secondary" className="text-[10px]">
-                    Sistema
+                    Conexiones
                   </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold tracking-tight">
-                    {waOk
-                      ? "Todo en línea"
-                      : waPending
-                        ? "WhatsApp esperando vincular"
-                        : "WhatsApp sin conexión"}
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
-                    {waOk
-                      ? "El worker está activo, los recordatorios se envían y el inbox sincroniza en tiempo real."
-                      : waPending
-                        ? "Escaneá el QR desde Ajustes → Integraciones para reactivar el envío automático."
-                        : "Andá a Ajustes → Integraciones para volver a conectar el canal."}
-                  </p>
-                </div>
-                <div className="text-muted-foreground flex items-center gap-3 text-[11px]">
-                  <span className="inline-flex items-center gap-1.5">
-                    {waOk ? (
-                      <Wifi className="text-success size-3" />
-                    ) : (
-                      <WifiOff className="text-muted-foreground size-3" />
-                    )}
-                    WhatsApp · {channels.whatsapp}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    {channels.meta === "connected" ? (
-                      <Wifi className="text-success size-3" />
-                    ) : (
-                      <WifiOff className="text-muted-foreground size-3" />
-                    )}
-                    Meta · {channels.meta}
-                  </span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Tip del día */}
-            <Card className="hairline-top relative overflow-hidden p-5">
-              <span
-                aria-hidden
-                className="from-chart-3/15 absolute -top-12 -right-10 size-32 rounded-full bg-gradient-to-br to-transparent blur-2xl"
-              />
-              <div className="relative space-y-3">
-                <div className="flex items-center justify-between">
-                  <span
-                    className="grid size-9 place-items-center rounded-xl"
-                    style={{
-                      background: "color-mix(in oklab, var(--chart-3) 14%, transparent)",
-                      color: "var(--chart-3)",
-                    }}
+                </header>
+                <p className="text-sm font-semibold tracking-tight">
+                  {waOk && (metaOk || channels.meta === "none")
+                    ? "Todo en línea"
+                    : waPending
+                      ? "WhatsApp esperando vincular"
+                      : "Revisar canales"}
+                </p>
+                <ul className="text-foreground mt-3 space-y-2 text-[13px]">
+                  <li className="ring-foreground/8 flex items-center justify-between gap-2 rounded-lg bg-muted/30 px-2.5 py-2 ring-1">
+                    <span className="inline-flex items-center gap-1.5">
+                      {waOk ? (
+                        <Wifi className="text-success size-3.5" />
+                      ) : (
+                        <WifiOff className="text-muted-foreground size-3.5" />
+                      )}
+                      <span className="text-muted-foreground text-[11px] uppercase tracking-wide">
+                        WhatsApp
+                      </span>
+                    </span>
+                    <span className="text-[12px] font-medium">{waState}</span>
+                  </li>
+                  <li className="ring-foreground/8 flex items-center justify-between gap-2 rounded-lg bg-muted/30 px-2.5 py-2 ring-1">
+                    <span className="inline-flex items-center gap-1.5">
+                      {metaOk ? (
+                        <Wifi className="text-success size-3.5" />
+                      ) : (
+                        <WifiOff className="text-muted-foreground size-3.5" />
+                      )}
+                      <span className="text-muted-foreground text-[11px] uppercase tracking-wide">
+                        Meta
+                      </span>
+                    </span>
+                    <span className="text-[12px] font-medium">{metaState}</span>
+                  </li>
+                </ul>
+                {(!waOk || (!metaOk && channels.meta !== "none")) && (
+                  <Link
+                    href="/ajustes/integraciones"
+                    className="text-primary mt-3 inline-flex items-center gap-1 text-[12px] font-medium hover:underline"
                   >
-                    <Lightbulb className="size-5" />
+                    Ir a Integraciones
+                    <ArrowUpRight className="size-3" />
+                  </Link>
+                )}
+              </Card>
+
+              {/* Pendientes operativos — solo datos reales */}
+              <Card className="hairline-top p-5">
+                <header className="mb-3 flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "grid size-9 place-items-center rounded-xl",
+                      pendingItems.length === 0
+                        ? "bg-success/12 text-success"
+                        : "bg-warning/15 text-warning-foreground",
+                    )}
+                  >
+                    <ListChecks className="size-5" />
                   </span>
-                  <Badge variant="secondary" className="text-[10px] capitalize">
-                    {tip.kind}
+                  <Badge variant="secondary" className="text-[10px]">
+                    Pendientes
                   </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold tracking-tight">
-                    {tip.title}
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
-                    {tip.body}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </section>
-      </Reveal>
+                </header>
+                {pendingItems.length === 0 ? (
+                  <>
+                    <p className="text-sm font-semibold tracking-tight">
+                      Sin pendientes urgentes
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-[13px]">
+                      No hay seguimientos vencidos, stock bajo ni saldos al
+                      día de hoy.
+                    </p>
+                    <p className="text-success mt-3 inline-flex items-center gap-1 text-[12px] font-medium">
+                      <Check className="size-3" />
+                      Operación al día
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-semibold tracking-tight">
+                      {pendingItems.length} cosa
+                      {pendingItems.length === 1 ? "" : "s"} a atender
+                    </p>
+                    <ul className="mt-3 space-y-1.5">
+                      {pendingItems.slice(0, 4).map((p) => (
+                        <li key={p.label}>
+                          <Link
+                            href={p.href}
+                            className="hover:bg-accent/60 group/pi ring-foreground/8 flex items-center gap-2 rounded-lg bg-muted/30 px-2.5 py-2 ring-1 transition-colors"
+                          >
+                            <span
+                              className={cn(
+                                "grid size-6 shrink-0 place-items-center rounded-md",
+                                p.tone === "alert"
+                                  ? "bg-destructive/10 text-destructive"
+                                  : p.tone === "warn"
+                                    ? "bg-warning/15 text-warning-foreground"
+                                    : "bg-info/12 text-info",
+                              )}
+                            >
+                              <p.icon className="size-3" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[12px] font-medium">
+                                {p.label}
+                              </p>
+                              <p className="text-muted-foreground truncate text-[10px]">
+                                {p.detail}
+                              </p>
+                            </div>
+                            <span className="text-foreground text-[12px] font-semibold tabular-nums">
+                              {p.label.includes("Saldo")
+                                ? formatARS(p.count)
+                                : p.count}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </Card>
+            </div>
+          </section>
+        </Reveal>
+      )}
     </div>
   );
 }
@@ -682,3 +780,4 @@ function hourBuckets(
   }
   return buckets;
 }
+
