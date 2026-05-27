@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Users, ChevronRight } from "lucide-react";
+import { Users, ChevronRight, Stethoscope } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/session";
 import { ROLES } from "@/lib/auth/roles";
@@ -10,15 +10,11 @@ import { PatientSearch } from "@/components/patients/patient-search";
 import { NewPatientDialog } from "@/components/patients/new-patient-dialog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { PATIENT_STATUS_STYLE } from "@/lib/ui/status";
 
 export const metadata: Metadata = { title: "Pacientes" };
-
-const STATUS_STYLE: Record<string, string> = {
-  activo: "bg-info/12 text-info border-info/20",
-  en_tratamiento: "bg-success/12 text-success border-success/20",
-  alta: "bg-muted text-muted-foreground",
-  inactivo: "bg-muted text-muted-foreground",
-};
 
 export default async function PacientesPage({
   searchParams,
@@ -44,16 +40,18 @@ export default async function PacientesPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Pacientes</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Historia Clínica Electrónica · {counters.total} pacientes ·{" "}
-            {counters.enTratamiento} en tratamiento
-          </p>
-        </div>
-        {canCreate && <NewPatientDialog />}
-      </header>
+      <PageHeader
+        eyebrow={
+          <>
+            <Stethoscope className="size-3" />
+            Historia clínica electrónica
+          </>
+        }
+        title="Pacientes"
+        description={`${counters.total} pacientes · ${counters.enTratamiento} en tratamiento`}
+        size="lg"
+        actions={canCreate ? <NewPatientDialog /> : undefined}
+      />
 
       <div className="flex flex-wrap items-center gap-3">
         <PatientSearch />
@@ -61,15 +59,16 @@ export default async function PacientesPage({
 
       <Card className="overflow-hidden p-0">
         {patients.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 px-6 py-16 text-center">
-            <Users className="text-muted-foreground size-8" />
-            <p className="font-medium">Sin pacientes</p>
-            <p className="text-muted-foreground text-sm">
-              {q
-                ? "No hay resultados para esa búsqueda."
-                : "Creá el primer paciente o digitalizá una Ficha de Ingreso."}
-            </p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title={q ? "Sin resultados" : "Sin pacientes"}
+            description={
+              q
+                ? "No encontramos pacientes para esa búsqueda. Probá con otro nombre, DNI o teléfono."
+                : "Creá el primer paciente o digitalizá una Ficha de Ingreso para empezar."
+            }
+            action={canCreate ? <NewPatientDialog /> : undefined}
+          />
         ) : (
           <ul className="divide-y">
             {patients.map((p) => {
@@ -96,7 +95,11 @@ export default async function PacientesPage({
                     </div>
                     <Badge
                       variant="outline"
-                      className={STATUS_STYLE[p.status] ?? ""}
+                      className={
+                        PATIENT_STATUS_STYLE[
+                          p.status as keyof typeof PATIENT_STATUS_STYLE
+                        ] ?? ""
+                      }
                     >
                       {p.status.replace("_", " ")}
                     </Badge>

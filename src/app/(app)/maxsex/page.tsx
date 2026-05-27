@@ -6,6 +6,7 @@ import { ROLES } from "@/lib/auth/roles";
 import { listProducts, maxsexOverview } from "@/lib/data/maxsex";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiRow } from "@/components/ui/kpi-row";
+import { PageHeader } from "@/components/ui/page-header";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { ProductCard } from "@/components/maxsex/product-card";
 import { LineStrip } from "@/components/maxsex/line-strip";
@@ -39,23 +40,17 @@ export default async function MaxsexPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-7">
-      <Reveal>
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <p className="text-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.18em]">
-              <Pill className="size-3" />
-              Línea OTC · Suplementos
-            </p>
-            <h1 className="font-heading text-3xl font-semibold tracking-tight">
-              Maxsex
-            </h1>
-            <p className="text-muted-foreground text-[15px] max-w-xl leading-relaxed">
-              Cinco fórmulas para sostener la intimidad. Catálogo interno; las
-              ediciones se sincronizan con el e-commerce.
-            </p>
-          </div>
-        </header>
-      </Reveal>
+      <PageHeader
+        eyebrow={
+          <>
+            <Pill className="size-3" />
+            Línea OTC · Suplementos
+          </>
+        }
+        title="Maxsex"
+        description="Cinco fórmulas para sostener la intimidad. Catálogo interno; las ediciones se sincronizan con el e-commerce."
+        size="lg"
+      />
 
       {products.length > 0 && (
         <Reveal delay={0.04}>

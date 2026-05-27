@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { Loader2, LogIn, ShieldAlert } from "lucide-react";
 
@@ -60,7 +61,15 @@ export function LoginForm({ next }: { next?: string }) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Contraseña</Label>
+          <div className="flex items-baseline justify-between">
+            <Label htmlFor="password">Contraseña</Label>
+            <Link
+              href="/forgot-password"
+              className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+            >
+              ¿La olvidaste?
+            </Link>
+          </div>
           <Input
             id="password"
             name="password"

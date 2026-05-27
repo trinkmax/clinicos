@@ -18,6 +18,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiRow } from "@/components/ui/kpi-row";
+import { PageHeader } from "@/components/ui/page-header";
+import { CAMPAIGN_ESTADO_STYLE } from "@/lib/ui/status";
 import { Bars } from "@/components/charts/charts";
 import { Reveal } from "@/components/motion/reveal";
 import {
@@ -54,18 +56,18 @@ export default async function MarketingPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-7">
-      <Reveal>
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <p className="text-muted-foreground text-sm">Crecimiento</p>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Marketing
-            </h1>
-            <p className="text-muted-foreground text-[15px]">
-              Segmentos, campañas y atribución de fuente a ingreso.
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <PageHeader
+        eyebrow={
+          <>
+            <Megaphone className="size-3" />
+            Crecimiento
+          </>
+        }
+        title="Marketing"
+        description="Segmentos, campañas y atribución de fuente a ingreso."
+        size="lg"
+        actions={
+          <>
             <NewSegmentDialog />
             <NewCampaignDialog
               segments={segments.map((s) => ({
@@ -77,9 +79,9 @@ export default async function MarketingPage() {
                 nombre: t.nombre,
               }))}
             />
-          </div>
-        </header>
-      </Reveal>
+          </>
+        }
+      />
 
       <KpiRow
         items={[
@@ -199,11 +201,9 @@ export default async function MarketingPage() {
                   <Badge
                     variant="outline"
                     className={cn(
-                      c.estado === "enviada"
-                        ? "bg-success/12 text-success border-success/20"
-                        : c.estado === "enviando"
-                          ? "bg-info/12 text-info border-info/20"
-                          : "bg-muted text-muted-foreground",
+                      CAMPAIGN_ESTADO_STYLE[
+                        c.estado as keyof typeof CAMPAIGN_ESTADO_STYLE
+                      ] ?? "",
                     )}
                   >
                     {CAMPAIGN_ESTADO_LABEL[c.estado]}

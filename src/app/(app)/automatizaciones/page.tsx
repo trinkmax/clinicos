@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiRow } from "@/components/ui/kpi-row";
+import { PageHeader } from "@/components/ui/page-header";
 import { Reveal } from "@/components/motion/reveal";
 import {
   NewAutomationDialog,
@@ -39,25 +40,24 @@ export default async function AutomatizacionesPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-7">
-      <Reveal>
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <p className="text-muted-foreground text-sm">Operación 24/7</p>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Automatizaciones
-            </h1>
-            <p className="text-muted-foreground text-[15px]">
-              Controles 15/30/60, adherencia y reactivación — el seguimiento
-              que nunca se cae.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <PageHeader
+        eyebrow={
+          <>
+            <Workflow className="size-3" />
+            Operación 24/7
+          </>
+        }
+        title="Automatizaciones"
+        description="Controles 15/30/60, adherencia y reactivación — el seguimiento que nunca se cae."
+        size="lg"
+        actions={
+          <>
             <RunNowButton />
             <AutomationBuilder />
             <NewAutomationDialog />
-          </div>
-        </header>
-      </Reveal>
+          </>
+        }
+      />
 
       <KpiRow
         className="grid gap-3 sm:grid-cols-3"

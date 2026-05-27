@@ -228,3 +228,78 @@ export async function updateTenantName(
     },
   );
 }
+
+/**
+ * Identidad/marca de la clínica. Se guarda en `tenants.branding` (jsonb)
+ * — no necesita migrar columnas. Solo lo edita owner/admin.
+ */
+export async function updateTenantBrand(
+  input: unknown,
+): Promise<ActionResult<{ ok: true }>> {
+  return action(
+    {
+      roles: ADMIN,
+      schema: z.object({
+        address: z.string().trim().max(240).optional().or(z.literal("")),
+        phone: z.string().trim().max(40).optional().or(z.literal("")),
+        email: z
+          .string()
+          .trim()
+          .max(160)
+          .email("Email inválido")
+          .optional()
+          .or(z.literal("")),
+        website: z
+          .string()
+          .trim()
+          .max(160)
+          .url("URL inválida")
+          .optional()
+          .or(z.literal("")),
+        logo_url: z
+          .string()
+          .trim()
+          .max(400)
+          .url("URL inválida")
+          .optional()
+          .or(z.literal("")),
+        tagline: z.string().trim().max(180).optional().or(z.literal("")),
+      }),
+      input,
+    },
+    async (data, ctx) => {
+      const supabase = await createClient();
+      const { data: row, error: readErr } = await supabase
+        .from("tenants")
+        .select("branding")
+        .eq("id", ctx.tenantId)
+        .single();
+      if (readErr) throw new Error(readErr.message);
+
+      const prev = (row.branding ?? {}) as Record<string, unknown>;
+      const next = {
+        ...prev,
+        address: data.address?.trim() || undefined,
+        phone: data.phone?.trim() || undefined,
+        email: data.email?.trim() || undefined,
+        website: data.website?.trim() || undefined,
+        logo_url: data.logo_url?.trim() || undefined,
+        tagline: data.tagline?.trim() || undefined,
+      };
+      // Limpiar undefineds para no contaminar JSON.
+      const cleaned = Object.fromEntries(
+        Object.entries(next).filter(([, v]) => v !== undefined),
+      );
+
+      const { error } = await supabase
+        .from("tenants")
+        .update({ branding: cleaned })
+        .eq("id", ctx.tenantId);
+      if (error) throw new Error(error.message);
+
+      revalidatePath("/ajustes");
+      revalidatePath("/ajustes/marca");
+      return { ok: true };
+    },
+  );
+}

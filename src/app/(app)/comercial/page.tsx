@@ -26,7 +26,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiRow } from "@/components/ui/kpi-row";
+import { PageHeader } from "@/components/ui/page-header";
 import { Reveal } from "@/components/motion/reveal";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  PLAN_ESTADO_STYLE,
+  FOLLOWUP_ESTADO_STYLE,
+} from "@/lib/ui/status";
 import { RegisterPaymentDialog } from "@/components/commercial/register-payment-dialog";
 import {
   NewProductDialog,
@@ -42,12 +48,6 @@ import {
 
 export const metadata: Metadata = { title: "Comercial" };
 
-const ESTADO_STYLE: Record<string, string> = {
-  activo: "bg-success/12 text-success border-success/20",
-  completado: "bg-info/12 text-info border-info/20",
-  en_mora: "bg-destructive/10 text-destructive border-destructive/20",
-  cancelado: "bg-muted text-muted-foreground",
-};
 const TABS = [
   { id: "planes", label: "Planes", icon: Wallet },
   { id: "entregas", label: "Entregas", icon: Truck },
@@ -103,23 +103,23 @@ export default async function ComercialPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-7">
-      <Reveal>
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <p className="text-muted-foreground text-sm">Gestión comercial</p>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Comercial · FIC
-            </h1>
-            <p className="text-muted-foreground text-[15px]">
-              Productos, planes, cobranzas, entregas, stock y adherencia.
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <PageHeader
+        eyebrow={
+          <>
+            <Wallet className="size-3" />
+            Gestión comercial
+          </>
+        }
+        title="Comercial · FIC"
+        description="Productos, planes, cobranzas, entregas, stock y adherencia."
+        size="lg"
+        actions={
+          <>
             <NewProductDialog />
             <NewPlanDialog patients={patientOpts} products={productOpts} />
-          </div>
-        </header>
-      </Reveal>
+          </>
+        }
+      />
 
       <KpiRow
         items={[
@@ -156,26 +156,20 @@ export default async function ComercialPage({
         ]}
       />
 
-      <nav className="flex gap-1 overflow-x-auto border-b">
-        {TABS.map((tt) => {
-          const active = tab === tt.id;
-          return (
-            <Link
+      <Tabs value={tab} className="overflow-x-auto">
+        <TabsList variant="line" className="w-fit">
+          {TABS.map((tt) => (
+            <TabsTrigger
               key={tt.id}
-              href={`/comercial?tab=${tt.id}`}
-              className={cn(
-                "-mb-px inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
-                active
-                  ? "border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground border-transparent",
-              )}
+              value={tt.id}
+              render={<Link href={`/comercial?tab=${tt.id}`} />}
             >
               <tt.icon className="size-4" />
               {tt.label}
-            </Link>
-          );
-        })}
-      </nav>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {tab === "planes" && (
         <Reveal delay={0.04} className="space-y-5">
@@ -284,7 +278,11 @@ export default async function ComercialPage({
                       </div>
                       <Badge
                         variant="outline"
-                        className={ESTADO_STYLE[pl.estado] ?? ""}
+                        className={
+                          PLAN_ESTADO_STYLE[
+                            pl.estado as keyof typeof PLAN_ESTADO_STYLE
+                          ] ?? ""
+                        }
                       >
                         {PLAN_ESTADO_LABEL[pl.estado]}
                       </Badge>
@@ -470,11 +468,9 @@ export default async function ComercialPage({
                       <Badge
                         variant="outline"
                         className={
-                          f.estado === "hecho"
-                            ? "bg-success/12 text-success border-success/20"
-                            : f.estado === "pendiente"
-                              ? "bg-warning/15 text-warning-foreground border-warning/30"
-                              : "bg-muted text-muted-foreground"
+                          FOLLOWUP_ESTADO_STYLE[
+                            f.estado as keyof typeof FOLLOWUP_ESTADO_STYLE
+                          ] ?? ""
                         }
                       >
                         {FOLLOWUP_ESTADO_LABEL[f.estado]}

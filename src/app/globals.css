@@ -62,6 +62,11 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
 
+  /* Capas de superficie — escalan jerarquía sin pelearse con Card */
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -77,6 +82,25 @@
 
   --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Escala tipográfica documentada — apoyo a PageHeader, eyebrows, microcopy */
+  --text-display: 2.25rem;
+  --text-display-line-height: 1.05;
+  --text-h1: 1.75rem;
+  --text-h1-line-height: 1.15;
+  --text-h2: 1.25rem;
+  --text-h2-line-height: 1.3;
+  --text-h3: 1rem;
+  --text-h3-line-height: 1.4;
+  --text-lead: 0.9375rem;
+  --text-lead-line-height: 1.6;
+  --text-body: 0.875rem;
+  --text-body-line-height: 1.55;
+  --text-small: 0.8125rem;
+  --text-small-line-height: 1.5;
+  --text-micro: 0.6875rem;
+  --text-micro-line-height: 1.4;
+  --tracking-eyebrow: 0.16em;
 }
 
 /* Animaciones registradas como utilidades (Tailwind v4). Calmas, con propósito. */
@@ -168,6 +192,11 @@
   --input: oklch(0.916 0.012 244);
   --ring: oklch(0.6 0.138 248);
 
+  /* Capas de superficie — sub-tonos calmos derivados de azul médico */
+  --surface-1: oklch(0.985 0.005 240);
+  --surface-2: oklch(0.972 0.008 240);
+  --surface-3: oklch(0.945 0.012 240);
+
   /* Gráficos — espectro médico azul→cian→teal */
   --chart-1: oklch(0.55 0.146 250);
   --chart-2: oklch(0.66 0.118 222);
@@ -221,6 +250,11 @@
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 13%);
   --ring: oklch(0.62 0.13 248);
+
+  /* Capas de superficie en oscuro — escala derivada del fondo plano */
+  --surface-1: oklch(0.22 0.022 258);
+  --surface-2: oklch(0.255 0.024 258);
+  --surface-3: oklch(0.29 0.026 258);
 
   --chart-1: oklch(0.68 0.138 248);
   --chart-2: oklch(0.72 0.114 218);
@@ -311,6 +345,35 @@
   );
   background-size: 220% 100%;
   animation: var(--animate-shimmer);
+}
+
+/* Divisor sutil — usar entre filas/listas para reducir ruido vs border */
+@utility divider-soft {
+  border-color: oklch(0.55 0.146 250 / 0.08);
+}
+
+/* Superficie elevada: cards/popovers que necesitan más jerarquía que Card base */
+@utility surface-elevated {
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-md);
+  border: 1px solid oklch(0.55 0.146 250 / 0.1);
+}
+
+/* Anillos compartidos para foco/active states */
+@utility ring-strong {
+  --tw-ring-color: oklch(0.55 0.146 250 / 0.3);
+}
+@utility ring-weak {
+  --tw-ring-color: oklch(0.55 0.146 250 / 0.08);
+}
+
+/* Eyebrows tipográficos — capital corta + tracking generoso */
+@utility text-eyebrow {
+  font-size: var(--text-micro);
+  line-height: var(--text-micro-line-height);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 @layer base {

@@ -426,51 +426,47 @@ export function DashboardView({
             Explorar el sistema
           </h2>
         </Reveal>
-        <Stagger
-          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-          delay={0.02}
-        >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((m) => {
             const Icon = ICONS[m.href] ?? LayoutDashboard;
             const available = m.phase === 0;
             return (
-              <StaggerItem key={m.href}>
-                <Card
-                  interactive
-                  className="hairline-top group/mod relative h-full p-5"
-                >
-                  <Link
-                    href={m.href}
-                    className="absolute inset-0"
-                    aria-label={m.title}
-                  />
-                  <div className="flex items-start justify-between">
-                    <span className="bg-primary/10 text-primary ring-primary/10 grid size-10 place-items-center rounded-xl ring-1 transition-transform duration-300 group-hover/mod:scale-105">
-                      <Icon className="size-5" />
+              <Card
+                key={m.href}
+                interactive
+                className="hairline-top group/mod relative h-full p-5"
+              >
+                <Link
+                  href={m.href}
+                  className="absolute inset-0"
+                  aria-label={m.title}
+                />
+                <div className="flex items-start justify-between">
+                  <span className="bg-primary/10 text-primary ring-primary/10 grid size-10 place-items-center rounded-xl ring-1 transition-transform duration-300 group-hover/mod:scale-105">
+                    <Icon className="size-5" />
+                  </span>
+                  {available ? (
+                    <span className="bg-success/12 text-success inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium">
+                      <span className="bg-success size-1.5 rounded-full" />
+                      Operativo
                     </span>
-                    {available ? (
-                      <span className="bg-success/12 text-success inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium">
-                        <span className="bg-success size-1.5 rounded-full" />
-                        Operativo
-                      </span>
-                    ) : (
-                      <Badge variant="secondary" className="text-[11px]">
-                        Fase {m.phase}
-                      </Badge>
-                    )}
-                  </div>
-                  <h3 className="mt-4 flex items-center gap-1 text-[15px] font-semibold tracking-tight">
-                    {m.title}
-                    <ArrowUpRight className="text-muted-foreground size-4 -translate-x-1 opacity-0 transition-all duration-300 group-hover/mod:translate-x-0 group-hover/mod:opacity-100" />
-                  </h3>
-                  <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                    {m.description}
-                  </p>
-                </Card>
-              </StaggerItem>
+                  ) : (
+                    <Badge variant="secondary" className="text-[11px]">
+                      Fase {m.phase}
+                    </Badge>
+                  )}
+                </div>
+                <h3 className="mt-4 flex items-center gap-1 text-[15px] font-semibold tracking-tight">
+                  {m.title}
+                  <ArrowUpRight className="text-muted-foreground size-4 -translate-x-1 opacity-0 transition-all duration-300 group-hover/mod:translate-x-0 group-hover/mod:opacity-100" />
+                </h3>
+                <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                  {m.description}
+                </p>
+              </Card>
             );
           })}
-        </Stagger>
+        </div>
       </section>
     </div>
   );

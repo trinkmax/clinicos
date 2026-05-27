@@ -7,6 +7,7 @@ import {
   HandCoins,
   CalendarClock,
   PiggyBank,
+  BarChart3,
 } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/session";
@@ -21,6 +22,8 @@ import { formatARS } from "@/lib/validation/commercial";
 import { FOLLOWUP_TIPO_LABEL } from "@/lib/validation/operations";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { moraTone } from "@/lib/ui/status";
 import { Donut, Bars, type DonutSegment } from "@/components/charts/charts";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { ReportesKpis } from "@/components/reportes/reportes-kpis";
@@ -40,12 +43,6 @@ const AGING_COLOR = [
   "oklch(0.7 0.16 50)",
   "var(--destructive)",
 ];
-
-function moraTone(d: number) {
-  if (d <= 30) return "bg-info/12 text-info";
-  if (d <= 60) return "bg-warning/15 text-warning-foreground";
-  return "bg-destructive/10 text-destructive";
-}
 
 export default async function ReportesPage() {
   await requireRole([ROLES.owner, ROLES.admin, ROLES.comercial]);
@@ -68,17 +65,17 @@ export default async function ReportesPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-7">
-      <Reveal>
-        <header className="space-y-1.5">
-          <p className="text-muted-foreground text-sm">Análisis</p>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Reportes y finanzas
-          </h1>
-          <p className="text-muted-foreground text-[15px]">
-            Indicadores clínicos, comerciales, cobranzas y seguimiento.
-          </p>
-        </header>
-      </Reveal>
+      <PageHeader
+        eyebrow={
+          <>
+            <BarChart3 className="size-3" />
+            Análisis
+          </>
+        }
+        title="Reportes y finanzas"
+        description="Indicadores clínicos, comerciales, cobranzas y seguimiento."
+        size="lg"
+      />
 
       {/* KPIs (isla cliente: el server pasa solo datos serializables) */}
       <ReportesKpis

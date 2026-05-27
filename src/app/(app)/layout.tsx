@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { requireTenant } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { getShellCounters } from "@/lib/data/shell";
 import { AppSidebar } from "@/components/shell/app-sidebar";
 import { AppTopbar } from "@/components/shell/app-topbar";
 import { CommandMenu } from "@/components/shell/command-menu";
@@ -30,11 +31,30 @@ export default async function AppLayout({
     /* sin perfil aún: se usa el email */
   }
 
+  const counters = ctx.role
+    ? await getShellCounters(ctx.role)
+    : {
+        fecha: new Date().toISOString().slice(0, 10),
+        turnosHoy: 0,
+        inboxUnread: 0,
+        seguimientosVencidos: 0,
+        stockBajo: 0,
+        cobranzasPendientes: 0,
+        channels: { whatsapp: "none" as const, meta: "none" as const },
+      };
+
   return (
     <SidebarProvider>
-      <AppSidebar role={ctx.role} email={ctx.email} fullName={fullName} />
+      <AppSidebar role={ctx.role} counters={counters} />
       <SidebarInset className="bg-aurora flex min-h-dvh flex-col">
-        <AppTopbar />
+        <AppTopbar
+          email={ctx.email}
+          fullName={fullName}
+          role={ctx.role}
+          inboxUnread={counters.inboxUnread}
+          seguimientosVencidos={counters.seguimientosVencidos}
+          stockBajo={counters.stockBajo}
+        />
         <main className="flex-1 p-4 sm:p-6">
           <PageTransition>{children}</PageTransition>
         </main>

@@ -23,6 +23,10 @@ export interface NavItem {
   /** Fase del roadmap en que se habilita (placeholder hasta entonces). */
   phase: number;
   description: string;
+  /** Clave del contador del shell que se muestra como badge (si aplica). */
+  counter?: "turnos" | "inbox" | "vencidos" | "stock";
+  /** Tonalidad del badge: "info" (azul) por defecto, "alert" para vencidos, "warn" para stock. */
+  counterTone?: "info" | "warn" | "alert";
 }
 
 export interface NavGroup {
@@ -86,6 +90,8 @@ export const NAV: NavGroup[] = [
         roles: OPS,
         phase: 2,
         description: "Agenda, check-in y turnos virtuales flexibles",
+        counter: "turnos",
+        counterTone: "info",
       },
       {
         title: "Pacientes",
@@ -102,6 +108,8 @@ export const NAV: NavGroup[] = [
         roles: COM,
         phase: 3,
         description: "Productos, planes, pagos, saldos y entregas",
+        counter: "vencidos",
+        counterTone: "alert",
       },
       {
         title: "Maxsex",
@@ -123,6 +131,8 @@ export const NAV: NavGroup[] = [
         roles: CRM,
         phase: 4,
         description: "WhatsApp y Facebook unificados",
+        counter: "inbox",
+        counterTone: "info",
       },
       {
         title: "Marketing",

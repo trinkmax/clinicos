@@ -20,6 +20,8 @@ import { FUENTE_LABEL } from "@/lib/validation/crm";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { CONVERSATION_ESTADO_STYLE } from "@/lib/ui/status";
 import { InboxRealtime } from "@/components/crm/inbox-realtime";
 import { InboxView } from "@/components/crm/inbox-view";
 import {
@@ -29,12 +31,6 @@ import {
 } from "@/components/crm/crm-controls";
 
 export const metadata: Metadata = { title: "Inbox" };
-
-const ESTADO_BADGE: Record<string, string> = {
-  abierta: "bg-success/12 text-success",
-  pendiente: "bg-warning/15 text-warning-foreground",
-  cerrada: "bg-muted text-muted-foreground",
-};
 
 function initials(name: string) {
   const p = name.trim().split(/\s+/);
@@ -77,42 +73,46 @@ export default async function InboxPage({
   return (
     <div className="mx-auto flex h-[calc(100dvh-7rem)] max-w-7xl flex-col gap-4">
       <InboxRealtime />
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Inbox</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {stats.convAbiertas} conversaciones abiertas · {stats.leads}{" "}
-            leads
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="bg-muted/60 flex items-center gap-1 rounded-lg p-1">
-            <Link
-              href="/inbox"
-              className={cn(
-                "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors",
-                !isContactos
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <InboxIcon className="size-3.5" /> Conversaciones
-            </Link>
-            <Link
-              href="/inbox?view=contactos"
-              className={cn(
-                "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors",
-                isContactos
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Users className="size-3.5" /> Contactos
-            </Link>
-          </div>
-          <NewContactDialog />
-        </div>
-      </header>
+      <PageHeader
+        eyebrow={
+          <>
+            <MessagesSquare className="size-3" />
+            Comunicación omnicanal
+          </>
+        }
+        title="Inbox"
+        description={`${stats.convAbiertas} conversaciones abiertas · ${stats.leads} leads`}
+        size="lg"
+        actions={
+          <>
+            <div className="bg-muted/60 flex items-center gap-1 rounded-lg p-1">
+              <Link
+                href="/inbox"
+                className={cn(
+                  "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors",
+                  !isContactos
+                    ? "bg-card text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <InboxIcon className="size-3.5" /> Conversaciones
+              </Link>
+              <Link
+                href="/inbox?view=contactos"
+                className={cn(
+                  "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors",
+                  isContactos
+                    ? "bg-card text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Users className="size-3.5" /> Contactos
+              </Link>
+            </div>
+            <NewContactDialog />
+          </>
+        }
+      />
 
       {isContactos ? (
         <Card className="flex-1 overflow-y-auto p-0">
@@ -207,7 +207,10 @@ export default async function InboxPage({
                         <span
                           className={cn(
                             "rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-                            ESTADO_BADGE[thread.conversation.estado],
+                            CONVERSATION_ESTADO_STYLE[
+                              thread.conversation
+                                .estado as keyof typeof CONVERSATION_ESTADO_STYLE
+                            ],
                           )}
                         >
                           {thread.conversation.estado}
