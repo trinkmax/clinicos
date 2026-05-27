@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ResetForm } from "./reset-form";
 
 export const metadata: Metadata = { title: "Nueva contraseña" };
@@ -23,9 +24,12 @@ export default async function ResetPasswordPage() {
           Este enlace ya fue usado o caducó. Solicitá uno nuevo desde
           «Olvidé mi contraseña».
         </p>
-        <Button render={<Link href="/forgot-password" />} className="w-full">
+        <Link
+          href="/forgot-password"
+          className={cn(buttonVariants(), "w-full")}
+        >
           Pedir un enlace nuevo
-        </Button>
+        </Link>
       </div>
     );
   }

@@ -53,6 +53,7 @@ export function RouteTabs({
           <TabsTrigger
             key={t.id}
             value={t.id}
+            nativeButton={false}
             render={<Link href={t.href} />}
           >
             {t.label}

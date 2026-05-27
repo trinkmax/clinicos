@@ -23,7 +23,7 @@ export function PageHeader({
   actions?: ReactNode;
   status?: ReactNode;
   align?: "between" | "stack";
-  size?: "md" | "lg";
+  size?: "md" | "lg" | "xl";
   className?: string;
 }) {
   return (
@@ -43,13 +43,15 @@ export function PageHeader({
         <h1
           className={cn(
             "font-semibold tracking-tight text-balance",
-            size === "lg" ? "text-3xl" : "text-2xl",
+            size === "xl" && "text-[2.25rem] leading-[1.05]",
+            size === "lg" && "text-[1.875rem] leading-[1.1]",
+            size === "md" && "text-2xl",
           )}
         >
           {title}
         </h1>
         {description ? (
-          <p className="text-muted-foreground text-[15px] leading-relaxed">
+          <p className="text-muted-foreground text-[15px] leading-relaxed max-w-2xl">
             {description}
           </p>
         ) : null}

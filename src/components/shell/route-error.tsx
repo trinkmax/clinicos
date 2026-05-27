@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * Plantilla de error-boundary reutilizable. Cada `error.tsx` por ruta importa
@@ -49,9 +50,12 @@ export function RouteError({
           <RefreshCw className="size-4" />
           Reintentar
         </Button>
-        <Button variant="outline" render={<Link href={homeHref} />}>
+        <Link
+          href={homeHref}
+          className={cn(buttonVariants({ variant: "outline" }))}
+        >
           Volver al inicio
-        </Button>
+        </Link>
       </div>
     </div>
   );

@@ -137,6 +137,10 @@ export default async function ComercialPage({
             icon: "trending",
             accent: "var(--success)",
             money: true,
+            hint:
+              totals.facturado > 0
+                ? `${Math.round((totals.cobrado / totals.facturado) * 100)}% del total`
+                : "ingresos del período",
           },
           {
             label: "Saldo pendiente",
@@ -162,6 +166,7 @@ export default async function ComercialPage({
             <TabsTrigger
               key={tt.id}
               value={tt.id}
+              nativeButton={false}
               render={<Link href={`/comercial?tab=${tt.id}`} />}
             >
               <tt.icon className="size-4" />

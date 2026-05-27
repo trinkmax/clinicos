@@ -38,12 +38,20 @@ export function StatCard({
 
   const body = (
     <>
-      <div
+      {/* Stripe vertical de acento — diferencia cada KPI a primera vista */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute top-0 left-0 h-full w-[3px] rounded-l-xl"
+        style={{
+          background: `linear-gradient(to bottom, ${accent} 0%, color-mix(in oklab, ${accent} 30%, transparent) 100%)`,
+        }}
+      />
+      <span
         aria-hidden
         className="pointer-events-none absolute -top-px right-0 left-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent"
       />
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-3">
+        <div className="min-w-0 space-y-3">
           <div className="flex items-center gap-2">
             <span
               className="grid size-8 place-items-center rounded-lg"
@@ -71,7 +79,8 @@ export function StatCard({
         ) : null}
       </div>
 
-      <div className="mt-3 flex items-end justify-between gap-3">
+      {/* Fila inferior — siempre presente para mantener simetría visual */}
+      <div className="mt-auto flex min-h-[20px] items-end justify-between gap-3 pt-3">
         <div className="flex items-center gap-2">
           {delta ? (
             <span
@@ -94,7 +103,11 @@ export function StatCard({
           ) : null}
           {hint ? (
             <span className="text-muted-foreground text-[11px]">{hint}</span>
-          ) : null}
+          ) : (
+            <span className="text-transparent text-[11px]" aria-hidden>
+              ·
+            </span>
+          )}
         </div>
         {spark && spark.length > 1 ? (
           <div className="w-24 shrink-0">
@@ -106,7 +119,7 @@ export function StatCard({
   );
 
   const shell = cn(
-    "group/stat bg-card text-card-foreground relative isolate flex flex-col overflow-hidden rounded-xl p-4 ring-1 ring-foreground/10 shadow-xs transition-all duration-300",
+    "group/stat bg-card text-card-foreground relative isolate flex h-full min-h-[140px] flex-col overflow-hidden rounded-xl p-4 pl-5 ring-1 ring-foreground/10 shadow-xs transition-all duration-300",
     href &&
       "hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
     className,

@@ -16,9 +16,10 @@ import {
   requestPasswordReset,
   type ForgotPasswordState,
 } from "@/lib/auth/actions";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export function ForgotForm() {
   const [state, formAction, isPending] = useActionState<
@@ -46,14 +47,16 @@ export function ForgotForm() {
             restablecer la contraseña. Puede tardar un par de minutos.
           </p>
         </div>
-        <Button
-          variant="outline"
-          className="w-full"
-          render={<Link href="/login" />}
+        <Link
+          href="/login"
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "w-full",
+          )}
         >
           <ArrowLeft className="size-4" />
           Volver al inicio de sesión
-        </Button>
+        </Link>
       </motion.div>
     );
   }

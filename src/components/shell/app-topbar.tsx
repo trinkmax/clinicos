@@ -106,8 +106,9 @@ export function AppTopbar({
   return (
     <header
       className={cn(
-        "bg-background/85 sticky top-0 z-30 flex h-14 items-center gap-2 border-b px-4 backdrop-blur-md",
-        "supports-[backdrop-filter]:bg-background/60",
+        "sticky top-0 z-30 flex h-16 items-center gap-2 border-b px-4 sm:px-5",
+        "bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55",
+        "after:pointer-events-none after:absolute after:right-0 after:bottom-[-1px] after:left-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-primary/15 after:to-transparent",
       )}
     >
       <SidebarTrigger className="-ml-1" />

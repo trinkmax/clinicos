@@ -1,8 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-/** Rutas accesibles sin sesión (incluye webhooks entrantes). */
-const PUBLIC_PREFIXES = ["/login", "/auth", "/api/webhooks"];
+/** Rutas accesibles sin sesión (incluye webhooks entrantes + auth recovery). */
+const PUBLIC_PREFIXES = [
+  "/login",
+  "/forgot-password",
+  "/reset-password",
+  "/auth",
+  "/api/webhooks",
+];
 /** Rutas públicas tokenizadas del paciente (futuro: links sin login). */
 const PUBLIC_TOKEN_PREFIX = "/p/";
 

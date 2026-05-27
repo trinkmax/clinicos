@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -17,7 +17,9 @@ export default function NotFound() {
             La página que buscás no existe o fue movida.
           </p>
         </div>
-        <Button render={<Link href="/" />}>Volver al inicio</Button>
+        <Link href="/" className={buttonVariants()}>
+          Volver al inicio
+        </Link>
       </div>
     </div>
   );
